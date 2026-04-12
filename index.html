@@ -1,18 +1,145 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-  <meta charset="UTF-8">
-  <title>Blog</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Blog</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            background: #f5f7fb;
+            color: #333333;
+            font-family: Arial, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+        }
+
+        header {
+            background: #7b1e3a;
+            color: white;
+            text-align: center;
+            padding: 60px 20px;
+            position: relative;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+        header p {
+            margin-top: 10px;
+            font-size: 16px;
+            opacity: 0.85;
+        }
+
+        #langBtn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 160px;
+            height: 35px;
+            text-align: center;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: white;
+            color: #1f2937;
+            font-size: 14px;
+        }
+
+        #langBtn:hover {
+            opacity: 0.7;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+        }
+
+        section {
+            margin-bottom: 40px;
+            min-height: 120px;
+        }
+
+        h2 {
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 6px;
+        }
+
+        .card {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        a:hover {
+            opacity: 0.7;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<h1>ykym blog</h1>
+    <header>
+        <button id="langBtn" onclick="toggleLang()">Switch to English</button>
 
-<ul>
-  <li><a href="post1.html">AWSで最初に詰んだ話</a></li>
-  <li><a href="post2.html">S3が理解できなかった理由</a></li>
-</ul>
+        <h1 data-ja="IT女子の学習と日常" data-en="An IT girr's study and daily life">
+            IT女子の学習と日常
+        </h1>
+        <p data-ja="ITやAWSの学習でつまずいたことや理解できたことを、初心者目線でわかりやすくまとめています。
+            日々の学びや気づきもゆるく発信しています。" data-en="I share my learning journey in IT and AWS, including struggles and insights, from a beginner’s perspective. 
+            I also post casual thoughts and daily learnings.">
+            ITやAWSの学習でつまずいたことや理解できたことを、初心者目線でわかりやすくまとめています。<br>
+            日々の学びや気づきもゆるく発信しています。
+        </p>
+    </header>
+
+    <ul>
+        <li><a href="post1.html">AWSで最初に詰んだ話</a></li>
+        <li><a href="post2.html">S3が理解できなかった理由</a></li>
+    </ul>
+
+    <script>
+        let currentLang = "ja";
+
+        function toggleLang() {
+            currentLang = currentLang === "ja" ? "en" : "ja";
+
+            document.querySelectorAll("[data-ja]").forEach(el => {
+                el.textContent = el.getAttribute("data-" + currentLang);
+            });
+
+            const btn = document.getElementById("langBtn");
+            btn.textContent = currentLang === "ja" ? "Switch to English" : "日本語に切り替える";
+        }
+    </script>
 
 </body>
+
 </html>
