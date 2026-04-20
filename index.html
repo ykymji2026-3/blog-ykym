@@ -133,10 +133,7 @@
         <section>
             <h2 data-ja="投稿一覧" data-en="Post List">投稿一覧</h2>
             <ul id="post-list">
-            <li class="card">
-                <a href="1776684318922.html">yoyaku</a>
-                <div class="meta">2026/04/20 20:25 / 日記</div>
-            </li>
+
             </ul>
         </section>
 
@@ -159,6 +156,86 @@
             const btn = document.getElementById("langBtn");
             btn.textContent = currentLang === "ja" ? "Switch to English" : "日本語に切り替える";
         }
+    </script>
+
+    <script>
+        let currentLang = localStorage.getItem("lang") || "ja";
+
+        // 言語切替（今のやつ改良）
+        function toggleLang() {
+            currentLang = currentLang === "ja" ? "en" : "ja";
+            localStorage.setItem("lang", currentLang);
+
+            applyLang();
+            loadPosts();
+        }
+
+        function applyLang() {
+            document.querySelectorAll("[data-ja]").forEach(el => {
+                el.textContent = el.getAttribute("data-" + currentLang);
+            });
+
+            const btn = document.getElementById("langBtn");
+            btn.textContent = currentLang === "ja" ? "Switch to English" : "日本語に切り替える";
+        }
+
+        // -------------------
+        // JSON読み込み
+        // -------------------
+        async function loadPosts() {
+            const res = await fetch("posts.json");
+            const posts = await res.json();
+
+            const list = document.getElementById("post-list");
+            list.innerHTML = "";
+
+            posts.forEach(post => {
+                const li = document.createElement("li");
+                li.className = "card";
+
+                li.innerHTML = `
+      <a href="?id=${post.id}">
+        ${post.memberOnly ? "🔒 " : ""}${post.title[currentLang]}
+      </a>
+      <div class="meta">${post.date} / ${post.category}</div>
+    `;
+
+                list.appendChild(li);
+            });
+        }
+
+        // -------------------
+        // 記事詳細表示
+        // -------------------
+        async function showPostIfNeeded() {
+            const params = new URLSearchParams(location.search);
+            const id = params.get("id");
+            if (!id) return;
+
+            const res = await fetch("posts.json");
+            const posts = await res.json();
+            const post = posts.find(p => p.id === id);
+            if (!post) return;
+
+            const main = document.querySelector("main");
+
+            main.innerHTML = `
+    <div class="article">
+      <h1>${post.title[currentLang]}</h1>
+      <div class="meta">${post.date} / ${post.category}</div>
+      <div>${post.content}</div>
+      <br>
+      <a href="/">← 戻る</a>
+    </div>
+  `;
+        }
+
+        // -------------------
+        window.onload = () => {
+            applyLang();
+            showPostIfNeeded();
+            loadPosts();
+        };
     </script>
 
 </body>
