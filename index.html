@@ -4,104 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Blog</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            background: #f5f7fb;
-            color: #333333;
-            font-family: Arial, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-        }
-
-        header {
-            background: #7b1e3a;
-            color: white;
-            text-align: center;
-            padding: 60px 20px;
-            position: relative;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 32px;
-        }
-
-        header p {
-            margin-top: 10px;
-            font-size: 16px;
-            opacity: 0.85;
-        }
-
-        #langBtn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            min-width: 160px;
-            height: 35px;
-            text-align: center;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            background: white;
-            color: #1f2937;
-            font-size: 14px;
-        }
-
-        #langBtn:hover {
-            opacity: 0.7;
-        }
-
-        main {
-            max-width: 900px;
-            margin: 40px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-        }
-
-        section {
-            margin-bottom: 40px;
-            min-height: 120px;
-        }
-
-        h2 {
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 8px;
-            margin-bottom: 16px;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        li {
-            margin-bottom: 6px;
-        }
-
-        .card {
-            background: #f9fafb;
-            padding: 16px;
-            border-radius: 8px;
-        }
-
-        a {
-            color: #2563eb;
-            text-decoration: none;
-        }
-
-        a:hover {
-            opacity: 0.7;
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-    </style>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -119,111 +21,30 @@
     </header>
 
     <main>
-        <section>
-            <h2 data-ja="リンク集" data-en="Link Collection">リンク集</h2>
-            <p>
-                <a href="http://localhost:5500/blog-ykym/" target="_blank" rel="noopener noreferrer"
-                    data-ja="ポートフォリオサイトはこちら" data-en="Portfolio Site link">ポートフォリオサイトはこちら</a>
-                <br>
-                <a href="https://github.com/ykymji2026-3" target="_blank" rel="noopener noreferrer" data-ja="GitHubはこちら"
-                    data-en="GitHub Link">GitHubはこちら</a>
-            </p>
-        </section>
+        <div class="container">
+            <section>
+                <h2 data-ja="リンク集" data-en="Link Collection">リンク集</h2>
+                <p>
+                    <a href="http://localhost:5500/portfolio-site/" target="_blank" rel="noopener noreferrer"
+                        data-ja="ポートフォリオサイトはこちら" data-en="Portfolio Site link">ポートフォリオサイトはこちら</a>
+                    <br>
+                    <a href="https://github.com/ykymji2026-3" target="_blank" rel="noopener noreferrer"
+                        data-ja="GitHubはこちら" data-en="GitHub Link">GitHubはこちら</a>
+                </p>
+            </section>
 
-        <section>
-            <h2 data-ja="投稿一覧" data-en="Post List">投稿一覧</h2>
-            <ul id="post-list">
-
-            </ul>
-        </section>
-
+            <section>
+                <h2 data-ja="投稿一覧" data-en="Post List">投稿一覧</h2>
+                <ul id="post-list"></ul>
+            </section>
+        </div>
     </main>
 
     <footer>
-        <p data-ja="? 2026 Portfolio" data-en="? 2026 Portfolio">@ 2026 ykym-blog</p>
+        <p data-ja="@ 2026 Blog-ykym" data-en="@ 2026 Blog-ykym">@ 2026 Blog-ykym</p>
     </footer>
 
-    <script>
-        let currentLang = localStorage.getItem("lang") || "ja";
-
-        // 言語切替（今のやつ改良）
-        function toggleLang() {
-            currentLang = currentLang === "ja" ? "en" : "ja";
-            localStorage.setItem("lang", currentLang);
-
-            applyLang();
-            loadPosts();
-        }
-
-        function applyLang() {
-            document.querySelectorAll("[data-ja]").forEach(el => {
-                el.textContent = el.getAttribute("data-" + currentLang);
-            });
-
-            const btn = document.getElementById("langBtn");
-            btn.textContent = currentLang === "ja" ? "Switch to English" : "日本語に切り替える";
-        }
-
-        // -------------------
-        // JSON読み込み
-        // -------------------
-        async function loadPosts() {
-            const res = await fetch("posts.json");
-            const posts = await res.json();
-
-            const list = document.getElementById("post-list");
-            list.innerHTML = "";
-
-            posts.forEach(post => {
-                const li = document.createElement("li");
-                li.className = "card";
-
-                const title = (post.title && post.title[currentLang]) || post.title;
-
-                li.innerHTML = `
-            <a href="?id=${post.id}">
-                ${post.memberOnly ? "🔒 " : ""}${title}
-            </a>
-            <div class="meta">${post.date} / ${post.category}</div>
-        `;
-
-                list.appendChild(li);
-            });
-        }
-
-        // -------------------
-        // 記事詳細表示
-        // -------------------
-        async function showPostIfNeeded() {
-            const params = new URLSearchParams(location.search);
-            const id = params.get("id");
-            if (!id) return;
-
-            const res = await fetch("posts.json");
-            const posts = await res.json();
-            const post = posts.find(p => p.id === id);
-            if (!post) return;
-
-            const main = document.querySelector("main");
-
-            main.innerHTML = `
-    <div class="article">
-      <h1>${(post.title && post.title[currentLang]) || post.title}</h1>
-      <div class="meta">${post.date} / ${post.category}</div>
-      <div>${post.content}</div>
-      <br>
-      <a href="/">← 戻る</a>
-    </div>
-  `;
-        }
-
-        // -------------------
-        window.onload = () => {
-            applyLang();
-            showPostIfNeeded();
-            loadPosts();
-        };
-    </script>
+    <script src="script.js"></script>
 
 </body>
 
