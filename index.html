@@ -144,21 +144,6 @@
     </footer>
 
     <script>
-        let currentLang = "ja";
-
-        function toggleLang() {
-            currentLang = currentLang === "ja" ? "en" : "ja";
-
-            document.querySelectorAll("[data-ja]").forEach(el => {
-                el.textContent = el.getAttribute("data-" + currentLang);
-            });
-
-            const btn = document.getElementById("langBtn");
-            btn.textContent = currentLang === "ja" ? "Switch to English" : "日本語に切り替える";
-        }
-    </script>
-
-    <script>
         let currentLang = localStorage.getItem("lang") || "ja";
 
         // 言語切替（今のやつ改良）
