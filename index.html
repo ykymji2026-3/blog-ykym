@@ -178,12 +178,14 @@
                 const li = document.createElement("li");
                 li.className = "card";
 
+                const title = (post.title && post.title[currentLang]) || post.title;
+
                 li.innerHTML = `
-      <a href="?id=${post.id}">
-        ${post.memberOnly ? "🔒 " : ""}${post.title[currentLang]}
-      </a>
-      <div class="meta">${post.date} / ${post.category}</div>
-    `;
+            <a href="?id=${post.id}">
+                ${post.memberOnly ? "🔒 " : ""}${title}
+            </a>
+            <div class="meta">${post.date} / ${post.category}</div>
+        `;
 
                 list.appendChild(li);
             });
@@ -206,7 +208,7 @@
 
             main.innerHTML = `
     <div class="article">
-      <h1>${post.title[currentLang]}</h1>
+      <h1>${(post.title && post.title[currentLang]) || post.title}</h1>
       <div class="meta">${post.date} / ${post.category}</div>
       <div>${post.content}</div>
       <br>
