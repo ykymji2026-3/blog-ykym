@@ -82,7 +82,8 @@ function renderPost(post) {
                 ${post.content}
             </div>
 
-            <a href="./" class="back-btn"
+            <a href="./"
+   class="back-btn"
    data-ja="← 戻る"
    data-en="← Back">
    ← 戻る
