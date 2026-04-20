@@ -107,31 +107,44 @@
 
 <body>
 
-<header>
-<button id="langBtn" onclick="toggleLang()">Switch to English</button>
-<h1 data-ja="IT女子の学習と日常" data-en="An IT girl's study and daily life">
-IT女子の学習と日常
-</h1>
+    <header>
+        <button id="langBtn" onclick="toggleLang()">Switch to English</button>
+        <h1 data-ja="IT女子の学習と日常" data-en="An IT girl's study and daily life">
+            IT女子の学習と日常
+        </h1>
 
-<p data-ja="ITやAWSの学習を初心者目線で分かりやすくまとめています"
-data-en="Sharing IT & AWS learning from a beginner’s perspective">
-ITやAWSの学習を初心者目線で分かりやすくまとめています
-</p>
-</header>
+        <p data-ja="ITやAWSの学習を初心者目線で分かりやすくまとめています" data-en="Sharing IT & AWS learning from a beginner’s perspective">
+            ITやAWSの学習を初心者目線で分かりやすくまとめています
+        </p>
+    </header>
 
-<main>
-<ul id="post-list">
+    <main>
+        <section>
+            <h2 data-ja="リンク集" data-en="Link Collection">リンク集</h2>
+            <p>
+                <a href="http://localhost:5500/blog-ykym/" target="_blank" rel="noopener noreferrer"
+                    data-ja="ポートフォリオサイトはこちら" data-en="Portfolio Site link">ポートフォリオサイトはこちら</a>
+                <br>
+                <a href="https://github.com/ykymji2026-3" target="_blank" rel="noopener noreferrer" data-ja="GitHubはこちら"
+                    data-en="GitHub Link">GitHubはこちら</a>
+            </p>
+        </section>
 
-  <li class="card">
-    <a href="1776684318922.html">yoyaku</a>
-    <div class="meta">2026/04/20 20:25 / 日記</div>
-  </li>
-</ul>
-</main>
+        <section>
+            <h2 data-ja="投稿一覧" data-en="Post List">投稿一覧</h2>
+            <ul id="post-list">
+            <li class="card">
+                <a href="1776684318922.html">yoyaku</a>
+                <div class="meta">2026/04/20 20:25 / 日記</div>
+            </li>
+            </ul>
+        </section>
 
-  <footer>
-    <p data-ja="? 2026 Portfolio" data-en="? 2026 Portfolio">@ 2026 ykym-blog</p>
-  </footer>
+    </main>
+
+    <footer>
+        <p data-ja="? 2026 Portfolio" data-en="? 2026 Portfolio">@ 2026 ykym-blog</p>
+    </footer>
 
     <script>
         let currentLang = "ja";
