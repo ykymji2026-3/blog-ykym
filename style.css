@@ -163,6 +163,17 @@ li {
   background: #eee;
   border-radius: 6px;
   text-decoration: none;
+  font-size: 14px;
+  border: none;      /* ←追加 */
+  cursor: pointer;   /* ←追加 */
+}
+
+/* 0件のときメッセージ表示 */
+.no-result {
+  text-align: center;
+  color: #777;
+  padding: 30px;
+  font-size: 14px;
 }
 
 /* =========================

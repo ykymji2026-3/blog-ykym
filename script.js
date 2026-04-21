@@ -17,6 +17,7 @@ function toggleLang() {
   localStorage.setItem("lang", currentLang);
 
   applyLang();
+  setupCategory(allPosts); // ←追加
   renderCurrentPage();
 }
 
@@ -28,6 +29,9 @@ function applyLang() {
   const btn = document.getElementById("langBtn");
   btn.textContent =
     currentLang === "ja" ? "Switch to English" : "日本語に切り替える";
+
+  document.getElementById("searchInput").placeholder =
+    currentLang === "ja" ? "検索..." : "Search...";
 }
 
 let cachedPosts = null;
@@ -40,12 +44,21 @@ async function getPosts() {
   return cachedPosts;
 }
 
+let allPosts = [];
+
 // -------------------
 // JSON読み込み
 // -------------------
 async function loadPosts() {
-  const posts = await getPosts();
+  allPosts = await getPosts();
 
+  const list = document.getElementById("post-list");
+  list.innerHTML = "";
+  renderList(allPosts);
+  setupCategory(allPosts);
+}
+
+function renderList(posts) {
   const list = document.getElementById("post-list");
   list.innerHTML = "";
 
@@ -56,11 +69,16 @@ async function loadPosts() {
     const title = (post.title && post.title[currentLang]) || post.title;
 
     li.innerHTML = `
-            <a href="?id=${post.id}">
-                ${post.memberOnly ? "🔒 " : ""}${title}
-            </a>
-            <div class="meta">${post.date} / ${post.category}</div>
-        `;
+  <a href="?id=${post.id}">
+    ${post.memberOnly ? "🔒 " : ""}${title}
+  </a>
+  <div class="meta">${post.date} / ${post.category}</div>
+
+<button class="back-btn danger" onclick="deletePost('${post.id}')"
+        class="back-btn">
+  ${currentLang === "ja" ? "削除" : "Delete"}
+</button>
+`;
 
     list.appendChild(li);
   });
@@ -88,10 +106,83 @@ function renderPost(post) {
    data-en="← Back">
    ← 戻る
 </a>
+
+<button class="back-btn danger" onclick="deletePost('${post.id}')"
+        class="back-btn">
+  ${currentLang === "ja" ? "削除" : "Delete"}
+</button>
         </div>
     </section>
     `;
 }
+
+async function deletePost(id) {
+  if (!confirm(currentLang === "ja" ? "削除しますか？" : "Delete this post?"))
+    return;
+
+  await fetch("GASのURL", {
+    method: "POST",
+    body: JSON.stringify({ id: id }),
+  });
+
+  alert(currentLang === "ja" ? "削除しました" : "Deleted");
+
+  location.reload();
+}
+
+function setupCategory(posts) {
+  const select = document.getElementById("categoryFilter");
+
+  const categories = [...new Set(posts.map((p) => p.category))];
+
+  select.innerHTML = `
+    <option value="all">${currentLang === "ja" ? "すべて" : "All"}</option>
+  `;
+
+  categories.forEach((cat) => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat;
+    select.appendChild(option);
+  });
+}
+
+function filterPosts() {
+  const keyword = document.getElementById("searchInput").value.toLowerCase();
+  const category = document.getElementById("categoryFilter").value;
+
+  let filtered = allPosts.filter((post) => {
+    const titleJa = post.title?.ja || "";
+    const titleEn = post.title?.en || "";
+    const content = post.content || "";
+
+    const matchKeyword =
+      titleJa.toLowerCase().includes(keyword) ||
+      titleEn.toLowerCase().includes(keyword) ||
+      content.toLowerCase().includes(keyword);
+
+    const matchCategory = category === "all" || post.category === category;
+
+    return matchKeyword && matchCategory;
+  });
+
+  if (filtered.length === 0) {
+    const list = document.getElementById("post-list");
+    list.innerHTML = `
+      <p style="text-align:center; color:#777; padding:20px;">
+        ${currentLang === "ja" ? "該当する記事がありません" : "No posts found"}
+      </p>
+    `;
+    return;
+  }
+
+  renderList(filtered);
+}
+
+document.getElementById("searchInput").addEventListener("input", filterPosts);
+document
+  .getElementById("categoryFilter")
+  .addEventListener("change", filterPosts);
 
 // -------------------
 // 記事詳細表示
@@ -108,6 +199,7 @@ async function showPostIfNeeded() {
   const main = document.querySelector("main");
 
   main.innerHTML = renderPost(post);
+  applyLang();
 }
 
 window.onload = () => {
