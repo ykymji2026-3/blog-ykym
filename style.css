@@ -168,6 +168,12 @@ li {
   cursor: pointer;   /* ←追加 */
 }
 
+.danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+
 /* 0件のときメッセージ表示 */
 .no-result {
   text-align: center;
