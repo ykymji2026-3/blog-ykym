@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- ログイン画面 -->
+<div id="login-screen" class="container">
+    <h2>ログイン</h2>
+    <input type="password" id="passwordInput" placeholder="パスワード">
+    <button class="back-btn" onclick="login()">ログイン</button>
+</div>
+
+<!-- 管理画面 -->
+<div id="admin-content" style="display:none;">
+
+    <header>
+        <h1>管理画面</h1>
+    </header>
+
+    <main>
+        <div class="container">
+
+            <section>
+                <h2>下書き一覧</h2>
+                <ul id="draft-list"></ul>
+            </section>
+
+            <section>
+                <h2>投稿一覧</h2>
+                <ul id="admin-post-list"></ul>
+            </section>
+
+            <section>
+                <h2>予約投稿</h2>
+                <ul id="scheduled-list"></ul>
+            </section>
+
+        </div>
+    </main>
+
+</div>
+
+<script src="admin.js"></script>
+
+</body>
+</html>
