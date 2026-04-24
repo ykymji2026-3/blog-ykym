@@ -1,17 +1,17 @@
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzx6uh9fJPU4GysqK6DetNMf2W6Bf0oXI6P9p3GxipOCgglgg5IpbUfKdaPY6kng5iZ/exec";
+const GAS_URL =
+  "https://script.google.com/macros/s/AKfycbzx6uh9fJPU4GysqK6DetNMf2W6Bf0oXI6P9p3GxipOCgglgg5IpbUfKdaPY6kng5iZ/exec";
 
 async function loadAdminPosts() {
   const res = await fetch("posts.json");
   const posts = await res.json();
-  
+
   const draftList = document.getElementById("draft-list");
   const postList = document.getElementById("admin-post-list");
 
   draftList.innerHTML = "";
   postList.innerHTML = "";
 
-  posts.forEach(post => {
-
+  posts.forEach((post) => {
     const title = post.title?.ja || post.title;
 
     // 下書き
@@ -35,7 +35,6 @@ async function loadAdminPosts() {
       </div>
     `;
     postList.appendChild(li);
-
   });
 }
 
@@ -49,8 +48,8 @@ async function deletePost(id) {
     body: JSON.stringify({
       action: "delete",
       id: id,
-      password: password
-    })
+      password: password,
+    }),
   });
 
   alert("削除しました");
@@ -58,13 +57,13 @@ async function deletePost(id) {
 }
 
 async function loadScheduledPosts() {
-  const res = await fetch(GAS_URL + "?action=listScheduled")
+  const res = await fetch(GAS_URL + "?action=listScheduled");
   const posts = await res.json();
 
   const list = document.getElementById("scheduled-list");
   list.innerHTML = "";
 
-  posts.forEach(post => {
+  posts.forEach((post) => {
     const li = document.createElement("li");
     li.innerHTML = `
       <div class="card">
@@ -92,17 +91,29 @@ async function login() {
 
   const res = await fetch(GAS_URL, {
     method: "POST",
+    mode: "no-cors", // ←これ追加
     body: JSON.stringify({
       action: "login",
-      password: password
-    })
+      password: password,
+    }),
   });
 
-  const data = await res.json();
+  console.log("res:", res);
+
+  const text = await res.text();
+  console.log("raw:", text);
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    alert("JSONじゃないレスポンス返ってきてる");
+    return;
+  }
+
+  console.log("parsed:", data);
 
   if (data.success) {
-
-    // ✅ ここに追加
     localStorage.setItem("adminPass", password);
 
     document.getElementById("login-screen").style.display = "none";
@@ -110,7 +121,6 @@ async function login() {
 
     loadAdminPosts();
     loadScheduledPosts();
-
   } else {
     alert("パスワードが違います");
   }
@@ -124,8 +134,8 @@ async function publishPost(id) {
     body: JSON.stringify({
       action: "publish",
       id: id,
-      password: password
-    })
+      password: password,
+    }),
   });
 
   alert("公開しました");
