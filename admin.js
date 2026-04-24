@@ -79,7 +79,6 @@ async function deletePost(id) {
 
   await fetch(GAS_URL, {
     method: "POST",
-    mode: "no-cors",
     body: JSON.stringify({
       action: "delete",
       id: id,
@@ -148,7 +147,6 @@ async function publishPost(id) {
 
   await fetch(GAS_URL, {
     method: "POST",
-    mode: "no-cors",
     body: JSON.stringify({
       action: "publish",
       id: id,
@@ -157,7 +155,9 @@ async function publishPost(id) {
   });
 
   alert("公開しました");
-  loadAdminPosts();
+  setTimeout(() => {
+    loadAdminPosts();
+  }, 2000);
 }
 
 function togglePost(id) {
