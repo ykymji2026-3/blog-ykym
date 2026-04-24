@@ -89,16 +89,15 @@ window.onload = () => {
 async function login() {
   const password = document.getElementById("passwordInput").value;
 
-  const res = await fetch(GAS_URL, {
+  await fetch(GAS_URL, {
     method: "POST",
-    mode: "no-cors", // ←これ追加
+    mode: "no-cors",
     body: JSON.stringify({
       action: "login",
-      password: password,
-    }),
+      password: password
+    })
   });
 
-  // 👉 成功前提で保存
   localStorage.setItem("adminPass", password);
 
   document.getElementById("login-screen").style.display = "none";
