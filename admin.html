@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Admin</title>
     <link rel="stylesheet" href="style.css">
+    <script type="module" src="admin.js"></script>
 </head>
 
 <body>
@@ -12,6 +13,7 @@
 <!-- ログイン画面 -->
 <div id="login-screen" class="container">
     <h2>ログイン</h2>
+    <input id="email" placeholder="メールアドレス" />
     <input type="password" id="passwordInput" placeholder="パスワード">
     <button class="back-btn" onclick="login()">ログイン</button>
 </div>
@@ -20,6 +22,7 @@
 <div id="admin-content" style="display:none;">
 
     <header>
+        <button id="langBtn" onclick="logout()">ログアウト</button>
         <h1>管理画面</h1>
     </header>
 
@@ -45,8 +48,6 @@
     </main>
 
 </div>
-
-<script src="admin.js"></script>
 
 </body>
 </html>

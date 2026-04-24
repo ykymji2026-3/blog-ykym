@@ -1,8 +1,24 @@
 const GAS_URL =
   "https://script.google.com/macros/s/AKfycbzx6uh9fJPU4GysqK6DetNMf2W6Bf0oXI6P9p3GxipOCgglgg5IpbUfKdaPY6kng5iZ/exec";
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDgFf_GZVsiJyQpfgDVH_P4ILRkHAz7F1U",
+  authDomain: "blog-e4600.firebaseapp.com",
+  projectId: "blog-e4600"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
 async function loadAdminPosts() {
-  const res = await fetch("posts.json");
+  const res = await fetch("posts.json?" + Date.now());
   const posts = await res.json();
 
   const draftList = document.getElementById("draft-list");
@@ -20,7 +36,7 @@ async function loadAdminPosts() {
       li.innerHTML = `
         <div class="card">
           <strong>${title}</strong>
-          <button onclick="publishPost('${post.id}')">公開</button>
+          <button class="danger" onclick="publishPost('${post.id}')">公開</button>
         </div>
       `;
       draftList.appendChild(li);
@@ -29,9 +45,24 @@ async function loadAdminPosts() {
     // 全投稿
     const li = document.createElement("li");
     li.innerHTML = `
-      <div class="card">
-        <strong>${title}</strong>
-        <button onclick="deletePost('${post.id}')">削除</button>
+      <div class="card-row">
+
+        <!-- クリックエリア -->
+        <div class="card-content" onclick="togglePost('${post.id}')">
+          <strong>${title}</strong>
+        </div>
+
+        <!-- 削除ボタン -->
+        <div class="card-actions">
+          <button class="danger" onclick="event.stopPropagation(); deletePost('${post.id}')">
+            削除
+          </button>
+        </div>
+      </div>
+
+      <!-- 展開部分 -->
+      <div id="content-${post.id}" class="detail">
+        ${post.content}
       </div>
     `;
     postList.appendChild(li);
@@ -39,12 +70,16 @@ async function loadAdminPosts() {
 }
 
 async function deletePost(id) {
-  const password = localStorage.getItem("adminPass");
+  if (!confirm("本当に削除する？")) return;
 
-  if (!confirm("削除する？")) return;
+  // 👇 これ追加
+  const password = prompt("管理者パスワード");
+
+  if (!password) return;
 
   await fetch(GAS_URL, {
     method: "POST",
+    mode: "no-cors",
     body: JSON.stringify({
       action: "delete",
       id: id,
@@ -52,8 +87,9 @@ async function deletePost(id) {
     }),
   });
 
-  alert("削除しました");
-  loadAdminPosts();
+  setTimeout(() => {
+    loadAdminPosts();
+  }, 2000);
 }
 
 async function loadScheduledPosts() {
@@ -87,31 +123,32 @@ window.onload = () => {
 };
 
 async function login() {
+  const email = document.getElementById("email").value;
   const password = document.getElementById("passwordInput").value;
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("admin-content").style.display = "block";
+
+    loadAdminPosts();
+    loadScheduledPosts();
+
+  } catch (e) {
+    alert("ログイン失敗しました");
+    console.error(e);
+  }
+}
+
+async function publishPost(id) {
+  const password = prompt("管理者パスワード");
+
+  if (!password) return;
 
   await fetch(GAS_URL, {
     method: "POST",
     mode: "no-cors",
-    body: JSON.stringify({
-      action: "login",
-      password: password
-    })
-  });
-
-  localStorage.setItem("adminPass", password);
-
-  document.getElementById("login-screen").style.display = "none";
-  document.getElementById("admin-content").style.display = "block";
-
-  loadAdminPosts();
-  loadScheduledPosts();
-}
-
-async function publishPost(id) {
-  const password = localStorage.getItem("adminPass");
-
-  await fetch(GAS_URL, {
-    method: "POST",
     body: JSON.stringify({
       action: "publish",
       id: id,
@@ -122,3 +159,32 @@ async function publishPost(id) {
   alert("公開しました");
   loadAdminPosts();
 }
+
+function togglePost(id) {
+  const el = document.getElementById(`content-${id}`);
+
+  el.style.display = el.style.display === "block" ? "none" : "block";
+}
+
+import { signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+function logout() {
+  signOut(auth).then(() => {
+    location.reload();
+  }).catch((error) => {
+    console.error("ログアウト失敗", error);
+  });
+}
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("admin-content").style.display = "block";
+  }
+});
+
+window.login = login;
+window.logout = logout;
+window.publishPost = publishPost;
+window.deletePost = deletePost;
+window.togglePost = togglePost;
