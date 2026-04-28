@@ -13,9 +13,11 @@
 <!-- ログイン画面 -->
 <div id="login-screen" class="container">
     <h2>ログイン</h2>
-    <input id="email" placeholder="メールアドレス" />
-    <input type="password" id="passwordInput" placeholder="パスワード">
-    <button class="back-btn" onclick="login()">ログイン</button>
+    <form id="login-form" onsubmit="event.preventDefault(); login();">
+        <input id="email" placeholder="メールアドレス" />
+        <input type="password" id="passwordInput" placeholder="パスワード">
+        <button type="submit" class="back-btn">ログイン</button>
+    </form>
 </div>
 
 <!-- 管理画面 -->
