@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getAuth,
-  signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -17,17 +16,6 @@ const auth = getAuth(app);
 
 const GAS_URL =
   "https://script.google.com/macros/s/AKfycbzx6uh9fJPU4GysqK6DetNMf2W6Bf0oXI6P9p3GxipOCgglgg5IpbUfKdaPY6kng5iZ/exec";
-
-async function login() {
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("passwordInput").value;
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (e) {
-    alert("ログイン失敗しました: " + e.message);
-    console.error(e);
-  }
-}
 
 async function loadAdminPosts() {
   const res = await fetch("posts.json?" + Date.now());
@@ -123,20 +111,13 @@ async function loadScheduledPosts() {
 }
 
 function initAdminPage() {
-  document.getElementById("login-form").addEventListener("submit", (event) => {
-    event.preventDefault();
-    login();
-  });
-
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      document.getElementById("login-screen").style.display = "none";
       document.getElementById("admin-content").style.display = "block";
       loadAdminPosts();
       loadScheduledPosts();
     } else {
-      document.getElementById("login-screen").style.display = "block";
-      document.getElementById("admin-content").style.display = "none";
+      location.href = "login/";
     }
   });
 }
@@ -178,7 +159,6 @@ function logout() {
     });
 }
 
-window.login = login;
 window.logout = logout;
 window.publishPost = publishPost;
 window.deletePost = deletePost;

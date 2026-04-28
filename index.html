@@ -19,7 +19,7 @@
             ITやAWSの学習を初心者目線で分かりやすくまとめています
         </p>
 
-        <a id="admin-link" class="admin-btn" href="admin.html" data-ja="管理画面" data-en="Admin">
+        <a id="admin-link" class="admin-btn" href="login/" data-ja="管理画面" data-en="Admin">
             管理画面
         </a>
     </header>
@@ -72,6 +72,7 @@
 
       onAuthStateChanged(auth, (user) => {
         if (user) {
+          document.getElementById("admin-link").href = "admin.html";
           document.getElementById("admin-link").style.display = "inline-block";
         }
       });
