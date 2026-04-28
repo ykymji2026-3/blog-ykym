@@ -110,15 +110,18 @@ async function loadScheduledPosts() {
 }
 
 window.onload = () => {
-  const saved = localStorage.getItem("adminPass");
-
-  if (saved) {
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("admin-content").style.display = "block";
-
-    loadAdminPosts();
-    loadScheduledPosts();
-  }
+  // localStorage に頼らず、Firebase の状態だけで判定する
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("admin-content").style.display = "block";
+      loadAdminPosts();
+      loadScheduledPosts();
+    } else {
+      document.getElementById("login-screen").style.display = "block";
+      document.getElementById("admin-content").style.display = "none";
+    }
+  });
 };
 
 async function login() {
@@ -169,8 +172,6 @@ function togglePost(id) {
 import { signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 function logout() {
-  localStorage.removeItem("adminPass");
-
   signOut(auth)
     .then(() => {
       location.reload();
