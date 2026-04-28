@@ -169,17 +169,24 @@ function togglePost(id) {
 import { signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 function logout() {
-  signOut(auth).then(() => {
-    location.reload();
-  }).catch((error) => {
-    console.error("ログアウト失敗", error);
-  });
+  localStorage.removeItem("adminPass");
+
+  signOut(auth)
+    .then(() => {
+      location.reload();
+    })
+    .catch((error) => {
+      console.error("ログアウト失敗", error);
+    });
 }
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
     document.getElementById("login-screen").style.display = "none";
     document.getElementById("admin-content").style.display = "block";
+  } else {
+    document.getElementById("login-screen").style.display = "block";
+    document.getElementById("admin-content").style.display = "none";
   }
 });
 
