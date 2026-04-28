@@ -41,11 +41,11 @@ header p {
   opacity: 0.85;
 }
 
-/* 言語切替ボタン */
-#langBtn {
+/* 言語切替ボタン・管理画面ボタン */
+#langBtn,
+.admin-btn {
   position: fixed;
   top: 20px;
-  right: 20px;
   min-width: 160px;
   height: 35px;
   padding: 8px 12px;
@@ -55,9 +55,21 @@ header p {
   background: white;
   color: #1f2937;
   font-size: 14px;
+  line-height: 19px;
+  text-decoration: none;
+  box-sizing: border-box;
 }
 
-#langBtn:hover {
+#langBtn {
+  right: 20px;
+}
+
+.admin-btn {
+  left: 20px;
+}
+
+#langBtn:hover,
+.admin-btn:hover {
   opacity: 0.7;
 }
 
