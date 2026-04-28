@@ -110,7 +110,7 @@ async function loadScheduledPosts() {
 }
 
 window.onload = () => {
-  // localStorage に頼らず、Firebase の状態だけで判定する
+  // Firebase の認証状態を監視（1回だけにする）
   onAuthStateChanged(auth, (user) => {
     if (user) {
       document.getElementById("login-screen").style.display = "none";
