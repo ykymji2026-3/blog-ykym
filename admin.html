@@ -13,9 +13,9 @@
 <!-- ログイン画面 -->
 <div id="login-screen" class="container">
     <h2>ログイン</h2>
-    <form id="login-form" onsubmit="event.preventDefault(); login();">
-        <input id="email" placeholder="メールアドレス" />
-        <input type="password" id="passwordInput" placeholder="パスワード">
+    <form id="login-form">
+        <input id="email" type="email" placeholder="メールアドレス" autocomplete="email" required>
+        <input type="password" id="passwordInput" placeholder="パスワード" autocomplete="current-password" required>
         <button type="submit" class="back-btn">ログイン</button>
     </form>
 </div>

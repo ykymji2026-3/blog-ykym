@@ -35,29 +35,36 @@ body {
 <div class="box">
   <h2 data-ja="ログイン" data-en="Login">ログイン</h2>
 
-  <input id="email"
-    data-ja-placeholder="メールアドレス"
-    data-en-placeholder="Email"
-    placeholder="メールアドレス">
+  <form id="login-form">
+    <input id="email"
+      type="email"
+      data-ja-placeholder="メールアドレス"
+      data-en-placeholder="Email"
+      placeholder="メールアドレス"
+      autocomplete="email"
+      required>
 
-  <br><br>
+    <br><br>
 
-  <input id="password" type="password"
-    data-ja-placeholder="パスワード"
-    data-en-placeholder="Password"
-    placeholder="パスワード">
+    <input id="password" type="password"
+      data-ja-placeholder="パスワード"
+      data-en-placeholder="Password"
+      placeholder="パスワード"
+      autocomplete="current-password"
+      required>
 
-  <br><br>
+    <br><br>
 
-  <button onclick="login()"
-    data-ja="ログイン"
-    data-en="Login">ログイン</button>
+    <button type="submit"
+      data-ja="ログイン"
+      data-en="Login">ログイン</button>
+  </form>
 
   <p id="msg"></p>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
 <script>
   let currentLang = localStorage.getItem("lang") || "ja";
@@ -76,7 +83,7 @@ body {
   
   // ログイン
   function login() {
-    const email = document.getElementById("email").value;
+    const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
   
     firebase.auth().signInWithEmailAndPassword(email, password)
@@ -123,6 +130,10 @@ body {
         }
   
       });
+  }
+
+  function logout() {
+    firebase.auth().signOut();
   }
 
   function applyAuthUI(user) {
@@ -185,6 +196,11 @@ body {
   }
 
   window.onload = () => {
+    document.getElementById("login-form").addEventListener("submit", event => {
+      event.preventDefault();
+      login();
+    });
+
     applyLang();
   };
 </script>

@@ -7,7 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY || "AIzaSyDgFf_GZVsiJyQpfgDVH_P4ILRkHAz7F1U",
+  apiKey: "AIzaSyDgFf_GZVsiJyQpfgDVH_P4ILRkHAz7F1U",
   authDomain: "blog-e4600.firebaseapp.com",
   projectId: "blog-e4600"
 };
@@ -19,7 +19,7 @@ const GAS_URL =
   "https://script.google.com/macros/s/AKfycbzx6uh9fJPU4GysqK6DetNMf2W6Bf0oXI6P9p3GxipOCgglgg5IpbUfKdaPY6kng5iZ/exec";
 
 async function login() {
-  const email = document.getElementById("email").value;
+  const email = document.getElementById("email").value.trim();
   const password = document.getElementById("passwordInput").value;
   try {
     await signInWithEmailAndPassword(auth, email, password);
@@ -122,7 +122,12 @@ async function loadScheduledPosts() {
   });
 }
 
-window.onload = () => {
+function initAdminPage() {
+  document.getElementById("login-form").addEventListener("submit", (event) => {
+    event.preventDefault();
+    login();
+  });
+
   onAuthStateChanged(auth, (user) => {
     if (user) {
       document.getElementById("login-screen").style.display = "none";
@@ -134,7 +139,9 @@ window.onload = () => {
       document.getElementById("admin-content").style.display = "none";
     }
   });
-};
+}
+
+document.addEventListener("DOMContentLoaded", initAdminPage);
 
 
 async function publishPost(id) {
