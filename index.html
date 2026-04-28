@@ -18,6 +18,10 @@
         <p data-ja="ITやAWSの学習を初心者目線で分かりやすくまとめています" data-en="Sharing IT & AWS learning from a beginner’s perspective">
             ITやAWSの学習を初心者目線で分かりやすくまとめています
         </p>
+
+        <header>
+            <a href="admin.html">管理画面</a>
+        </header>
     </header>
 
     <main>
@@ -53,7 +57,29 @@
         <p data-ja="@ 2026 Blog-ykym" data-en="@ 2026 Blog-ykym">@ 2026 Blog-ykym</p>
     </footer>
 
-    <script src="script.js"></script>
+    <button id="admin-link" style="display:none;" onclick="location.href='admin.html'">
+      管理画面
+    </button>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+      import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDgFf_GZVsiJyQpfgDVH_P4ILRkHAz7F1U",
+        authDomain: "blog-e4600.firebaseapp.com",
+        projectId: "blog-e4600"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          document.getElementById("admin-link").style.display = "block";
+        }
+      });
+    </script>
 
 </body>
 
