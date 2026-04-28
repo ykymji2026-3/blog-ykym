@@ -24,6 +24,31 @@ body {
   top: 20px;
   right: 20px;
 }
+
+.toast {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  max-width: min(360px, calc(100vw - 40px));
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #b91c1c;
+  color: white;
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: left;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 20;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
 </style>
 
 </head>
@@ -55,12 +80,13 @@ body {
     <br><br>
 
     <button type="submit"
+      id="login-submit"
       data-ja="ログイン"
       data-en="Login">ログイン</button>
   </form>
-
-  <p id="msg"></p>
 </div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -84,16 +110,79 @@ body {
   function login() {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
+    const button = document.getElementById("login-submit");
+
+    button.disabled = true;
 
     firebase.auth().signInWithEmailAndPassword(email, password)
       .then(() => {
         location.href = "../admin.html";
       })
       .catch(e => {
-        document.getElementById("msg").textContent =
-          currentLang === "ja" ? "ログインに失敗しました" : "Login failed";
+        showToast(getLoginErrorMessage(e.code));
         console.error(e);
+      })
+      .finally(() => {
+        button.disabled = false;
       });
+  }
+
+  function getLoginErrorMessage(code) {
+    const messages = {
+      "auth/invalid-email": {
+        ja: "メールアドレスの形式が正しくありません。",
+        en: "The email address is invalid."
+      },
+      "auth/user-disabled": {
+        ja: "このアカウントは無効になっています。",
+        en: "This account has been disabled."
+      },
+      "auth/user-not-found": {
+        ja: "このメールアドレスのユーザーは見つかりません。",
+        en: "No user was found for this email address."
+      },
+      "auth/wrong-password": {
+        ja: "パスワードが違います。",
+        en: "The password is incorrect."
+      },
+      "auth/invalid-credential": {
+        ja: "メールアドレスまたはパスワードが違います。",
+        en: "The email address or password is incorrect."
+      },
+      "auth/missing-password": {
+        ja: "パスワードを入力してください。",
+        en: "Please enter your password."
+      },
+      "auth/too-many-requests": {
+        ja: "ログイン試行が多すぎます。少し時間をおいて再度お試しください。",
+        en: "Too many login attempts. Please try again later."
+      },
+      "auth/network-request-failed": {
+        ja: "ネットワークに接続できません。通信状況を確認してください。",
+        en: "Network error. Please check your connection."
+      }
+    };
+
+    const fallback = {
+      ja: "ログインできませんでした。入力内容を確認してください。",
+      en: "Could not log in. Please check your details."
+    };
+    const message = messages[code] || fallback;
+
+    return message[currentLang];
+  }
+
+  let toastTimer;
+
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 4000);
   }
 
   function toggleLang() {

@@ -41,8 +41,9 @@ header p {
   opacity: 0.85;
 }
 
-/* 言語切替ボタン・管理画面ボタン */
+/* 言語切替ボタン・ヘッダーボタン */
 #langBtn,
+.header-btn-left,
 .admin-btn {
   position: fixed;
   top: 20px;
@@ -67,11 +68,13 @@ header p {
   right: 20px;
 }
 
+.header-btn-left,
 .admin-btn {
   left: 20px;
 }
 
 #langBtn:hover,
+.header-btn-left:hover,
 .admin-btn:hover {
   opacity: 0.7;
 }
