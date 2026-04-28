@@ -93,8 +93,14 @@ function deletePostById(postId) {
   // 2. 該当記事を削除
   const filtered = posts.filter((p) => p.id !== postId);
 
+  if (filtered.length === posts.length) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ success: false, error: "post not found" }),
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+
   // 3. GitHub に更新
-  UrlFetchApp.fetch(url, {
+  const updateRes = UrlFetchApp.fetch(url, {
     method: "put",
     headers: { Authorization: "Bearer " + token },
     contentType: "application/json",
@@ -106,8 +112,18 @@ function deletePostById(postId) {
     muteHttpExceptions: true,
   });
 
+  if (![200, 201].includes(updateRes.getResponseCode())) {
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: false,
+        error: `github update failed: ${updateRes.getResponseCode()}`,
+        detail: updateRes.getContentText(),
+      }),
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+
   return ContentService.createTextOutput(
-    JSON.stringify({ success: true }),
+    JSON.stringify({ success: true, deletedId: postId }),
   ).setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -154,16 +170,24 @@ function publishPostById(postId) {
   );
 
   // 2. 該当記事を公開（draft フラグ削除）
+  let found = false;
   const updated = posts.map((p) => {
     if (p.id === postId) {
+      found = true;
       p.draft = false;
       p.publishedAt = new Date().toISOString();
     }
     return p;
   });
 
+  if (!found) {
+    return ContentService.createTextOutput(
+      JSON.stringify({ success: false, error: "post not found" }),
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+
   // 3. GitHub に更新
-  UrlFetchApp.fetch(url, {
+  const updateRes = UrlFetchApp.fetch(url, {
     method: "put",
     headers: { Authorization: "Bearer " + token },
     contentType: "application/json",
@@ -175,7 +199,17 @@ function publishPostById(postId) {
     muteHttpExceptions: true,
   });
 
+  if (![200, 201].includes(updateRes.getResponseCode())) {
+    return ContentService.createTextOutput(
+      JSON.stringify({
+        success: false,
+        error: `github update failed: ${updateRes.getResponseCode()}`,
+        detail: updateRes.getContentText(),
+      }),
+    ).setMimeType(ContentService.MimeType.JSON);
+  }
+
   return ContentService.createTextOutput(
-    JSON.stringify({ success: true }),
+    JSON.stringify({ success: true, publishedId: postId }),
   ).setMimeType(ContentService.MimeType.JSON);
 }

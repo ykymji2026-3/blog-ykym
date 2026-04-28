@@ -20,7 +20,10 @@ const GAS_URL =
 async function loadAdminPosts() {
   const res = await fetch("posts.json?" + Date.now());
   const posts = await res.json();
+  renderAdminPosts(posts);
+}
 
+function renderAdminPosts(posts) {
   const draftList = document.getElementById("draft-list");
   const postList = document.getElementById("admin-post-list");
 
@@ -44,6 +47,7 @@ async function loadAdminPosts() {
 
     // 全投稿
     const li = document.createElement("li");
+    li.dataset.postId = post.id;
     li.innerHTML = `
       <div class="card-row">
 
@@ -72,17 +76,23 @@ async function loadAdminPosts() {
 async function deletePost(id) {
   if (!confirm("本当に削除されますか？")) return;
 
-  const token = await auth.currentUser.getIdToken();
-  const res = await fetch(GAS_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ action: "delete", id, idToken: token })
-  });
+  try {
+    const token = await auth.currentUser.getIdToken();
+    const res = await fetch(GAS_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "delete", id, idToken: token })
+    });
+    const result = await res.json();
 
-  if (res.ok) {
-    await loadAdminPosts();
-  } else {
-    alert("削除できませんでした。");
+    if (!res.ok || !result.success) {
+      throw new Error(result.error || "削除できませんでした。");
+    }
+
+    document.querySelector(`[data-post-id="${id}"]`)?.remove();
+    document.querySelector(`#content-${CSS.escape(id)}`)?.remove();
+  } catch (error) {
+    console.error("削除失敗", error);
+    alert("削除できませんでした: " + error.message);
   }
 }
 
@@ -130,15 +140,15 @@ async function publishPost(id) {
 
   const res = await fetch(GAS_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ action: "publish", id, idToken: token })
   });
+  const result = await res.json();
 
-  if (res.ok) {
+  if (res.ok && result.success) {
     alert("公開しました");
     await loadAdminPosts();
   } else {
-    alert("公開失敗");
+    alert("公開失敗: " + (result.error || "原因不明のエラー"));
   }
 }
 
