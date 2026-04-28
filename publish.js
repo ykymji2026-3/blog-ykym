@@ -57,50 +57,40 @@ function doGet(e) {
 
 function deletePostById(postId) {
   const repo = "ykymji2026-3/blog-ykym";
-  Logger.log("DELETE実行: " + postId);
-
-  const token = PropertiesService
-    .getScriptProperties()
-    .getProperty("GITHUB_TOKEN");
-
+  const token = PropertiesService.getScriptProperties().getProperty("GITHUB_TOKEN");
   const url = `https://api.github.com/repos/${repo}/contents/posts.json`;
 
-  const file = UrlFetchApp.fetch(url, {
+  // 1. posts.json を取得
+  const fileRes = UrlFetchApp.fetch(url, {
     method: "get",
-    headers: {
-      Authorization: "Bearer " + token
-    }
+    headers: { Authorization: "Bearer " + token },
+    muteHttpExceptions: true
   });
 
-  const fileData = JSON.parse(file.getContentText());
+  if (fileRes.getResponseCode() !== 200) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "failed to fetch file" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 
-  const decoded = Utilities.newBlob(
-    Utilities.base64Decode(fileData.content)
-  ).getDataAsString("UTF-8");
+  const fileData = JSON.parse(fileRes.getContentText());
+  const posts = JSON.parse(Utilities.newBlob(Utilities.base64Decode(fileData.content)).getDataAsString());
 
-  let posts = JSON.parse(decoded);
+  // 2. 該当記事を削除
+  const filtered = posts.filter(p => p.id !== postId);
 
-  // 削除
-  posts = posts.filter(post => post.id !== postId);
-
-  // 更新
+  // 3. GitHub に更新
   UrlFetchApp.fetch(url, {
     method: "put",
-    contentType: "application/json",
-    headers: {
-      Authorization: "Bearer " + token
-    },
+    headers: { Authorization: "Bearer " + token },
     payload: JSON.stringify({
-      message: "delete post",
-      content: Utilities.base64Encode(
-        Utilities.newBlob(JSON.stringify(posts, null, 2)).getBytes()
-      ),
+      message: `Delete post ${postId}`,
+      content: Utilities.base64Encode(JSON.stringify(filtered, null, 2)),
       sha: fileData.sha
-    })
+    }),
+    muteHttpExceptions: true
   });
 
-  return ContentService
-    .createTextOutput(JSON.stringify({ status: "ok" }))
+  return ContentService.createTextOutput(JSON.stringify({ success: true }))
     .setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -123,73 +113,45 @@ function getScheduledPosts() {
 
 function publishPostById(postId) {
   const repo = "ykymji2026-3/blog-ykym";
-
-  const token = PropertiesService
-    .getScriptProperties()
-    .getProperty("GITHUB_TOKEN");
-
+  const token = PropertiesService.getScriptProperties().getProperty("GITHUB_TOKEN");
   const url = `https://api.github.com/repos/${repo}/contents/posts.json`;
 
-  // ====================
-  // ① 取得
-  // ====================
-  const file = UrlFetchApp.fetch(url, {
+  // 1. posts.json を取得
+  const fileRes = UrlFetchApp.fetch(url, {
     method: "get",
-    headers: {
-      Authorization: "Bearer " + token
-    }
+    headers: { Authorization: "Bearer " + token },
+    muteHttpExceptions: true
   });
 
-  const fileData = JSON.parse(file.getContentText());
-
-  const decoded = Utilities.newBlob(
-    Utilities.base64Decode(fileData.content)
-  ).getDataAsString("UTF-8");
-
-  let posts = [];
-
-  try {
-    posts = JSON.parse(decoded);
-    if (!Array.isArray(posts)) posts = [];
-  } catch (e) {
-    posts = [];
+  if (fileRes.getResponseCode() !== 200) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "failed to fetch file" }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
 
-  // ====================
-  // ② draft → false
-  // ====================
-  posts = posts.map(post => {
-    if (post.id === postId) {
-      post.draft = false;
+  const fileData = JSON.parse(fileRes.getContentText());
+  const posts = JSON.parse(Utilities.newBlob(Utilities.base64Decode(fileData.content)).getDataAsString());
+
+  // 2. 該当記事を公開（draft フラグ削除）
+  const updated = posts.map(p => {
+    if (p.id === postId) {
+      p.draft = false;
+      p.publishedAt = new Date().toISOString();
     }
-    return post;
+    return p;
   });
 
-  // ====================
-  // ③ 更新
-  // ====================
+  // 3. GitHub に更新
   UrlFetchApp.fetch(url, {
     method: "put",
-    contentType: "application/json",
-    headers: {
-      Authorization: "Bearer " + token
-    },
+    headers: { Authorization: "Bearer " + token },
     payload: JSON.stringify({
-      message: "publish post",
-      content: Utilities.base64Encode(
-        Utilities.newBlob(
-          JSON.stringify(posts, null, 2),
-          "application/json"
-        ).getBytes()
-      ),
+      message: `Publish post ${postId}`,
+      content: Utilities.base64Encode(JSON.stringify(updated, null, 2)),
       sha: fileData.sha
-    })
+    }),
+    muteHttpExceptions: true
   });
 
-  // ====================
-  // ④ レスポンス
-  // ====================
-  return ContentService
-    .createTextOutput(JSON.stringify({ status: "ok" }))
+  return ContentService.createTextOutput(JSON.stringify({ success: true }))
     .setMimeType(ContentService.MimeType.JSON);
 }

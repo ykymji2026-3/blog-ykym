@@ -7,7 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDgFf_GZVsiJyQpfgDVH_P4ILRkHAz7F1U",
+  apiKey: process.env.FIREBASE_API_KEY || "AIzaSyDgFf_GZVsiJyQpfgDVH_P4ILRkHAz7F1U",
   authDomain: "blog-e4600.firebaseapp.com",
   projectId: "blog-e4600"
 };
