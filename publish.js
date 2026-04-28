@@ -42,10 +42,16 @@ function verifyIdToken(idToken) {
 }
 
 function doGet(e) {
-  const action = e.parameter.action;
+  const idToken = e.parameter.idToken;
+  
+  if (!verifyIdToken(idToken)) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "unauthorized" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 
+  const action = e.parameter.action;
   if (action === "listScheduled") {
-    return getScheduledPosts();
+    return getScheduledPosts();  // proper response
   }
 }
 

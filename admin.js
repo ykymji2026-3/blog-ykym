@@ -1,6 +1,3 @@
-const GAS_URL =
-  "https://script.google.com/macros/s/AKfycbzx6uh9fJPU4GysqK6DetNMf2W6Bf0oXI6P9p3GxipOCgglgg5IpbUfKdaPY6kng5iZ/exec";
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getAuth,
@@ -17,6 +14,20 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+
+const GAS_URL =
+  "https://script.google.com/macros/s/AKfycbzx6uh9fJPU4GysqK6DetNMf2W6Bf0oXI6P9p3GxipOCgglgg5IpbUfKdaPY6kng5iZ/exec";
+
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("passwordInput").value;
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (e) {
+    alert("ログイン失敗しました: " + e.message);
+    console.error(e);
+  }
+}
 
 async function loadAdminPosts() {
   const res = await fetch("posts.json?" + Date.now());
@@ -71,7 +82,7 @@ async function loadAdminPosts() {
 }
 
 async function deletePost(id) {
-  if (!confirm("本当に削除する？")) return;
+  if (!confirm("本当に削除されますか？")) return;
 
   const token = await auth.currentUser.getIdToken();
   const res = await fetch(GAS_URL, {
@@ -83,13 +94,18 @@ async function deletePost(id) {
   if (res.ok) {
     await loadAdminPosts();
   } else {
-    alert("削除に失敗しました");
+    alert("削除できませんでした。");
   }
 }
 
 async function loadScheduledPosts() {
   const token = await auth.currentUser.getIdToken();
   const res = await fetch(`${GAS_URL}?action=listScheduled&idToken=${encodeURIComponent(token)}`);
+    
+  if (!res.ok) {
+    console.error("スケジュール取得失敗");
+    return;
+  }
   const posts = await res.json();
 
   const list = document.getElementById("scheduled-list");
@@ -120,33 +136,22 @@ window.onload = () => {
   });
 };
 
-async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("passwordInput").value;
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-  } catch (e) {
-    alert("ログイン失敗しました");
-  }
-}
 
 async function publishPost(id) {
   const token = await auth.currentUser.getIdToken();
 
-  await fetch(GAS_URL, {
+  const res = await fetch(GAS_URL, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      action: "publish",
-      id,
-      idToken: token,
-    }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "publish", id, idToken: token })
   });
 
-  alert("公開しました");
-  setTimeout(loadAdminPosts, 2000);
+  if (res.ok) {
+    alert("公開しました");
+    await loadAdminPosts();
+  } else {
+    alert("公開失敗");
+  }
 }
 
 function togglePost(id) {
