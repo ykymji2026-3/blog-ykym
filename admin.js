@@ -5,6 +5,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import {
   getAuth,
   signInWithEmailAndPassword,
+  signOut,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -72,27 +73,23 @@ async function loadAdminPosts() {
 async function deletePost(id) {
   if (!confirm("本当に削除する？")) return;
 
-  // 👇 これ追加
-  const password = prompt("管理者パスワード");
-
-  if (!password) return;
-
-  await fetch(GAS_URL, {
+  const token = await auth.currentUser.getIdToken();
+  const res = await fetch(GAS_URL, {
     method: "POST",
-    body: JSON.stringify({
-      action: "delete",
-      id: id,
-      password: password,
-    }),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "delete", id, idToken: token })
   });
 
-  setTimeout(() => {
-    loadAdminPosts();
-  }, 2000);
+  if (res.ok) {
+    await loadAdminPosts();
+  } else {
+    alert("削除に失敗しました");
+  }
 }
 
 async function loadScheduledPosts() {
-  const res = await fetch(GAS_URL + "?action=listScheduled");
+  const token = await auth.currentUser.getIdToken();
+  const res = await fetch(`${GAS_URL}?action=listScheduled&idToken=${encodeURIComponent(token)}`);
   const posts = await res.json();
 
   const list = document.getElementById("scheduled-list");
@@ -110,7 +107,6 @@ async function loadScheduledPosts() {
 }
 
 window.onload = () => {
-  // Firebase の認証状態を監視（1回だけにする）
   onAuthStateChanged(auth, (user) => {
     if (user) {
       document.getElementById("login-screen").style.display = "none";
@@ -127,40 +123,30 @@ window.onload = () => {
 async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("passwordInput").value;
-
   try {
     await signInWithEmailAndPassword(auth, email, password);
-
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("admin-content").style.display = "block";
-
-    loadAdminPosts();
-    loadScheduledPosts();
-
   } catch (e) {
     alert("ログイン失敗しました");
-    console.error(e);
   }
 }
 
 async function publishPost(id) {
-  const password = prompt("管理者パスワード");
-
-  if (!password) return;
+  const token = await auth.currentUser.getIdToken();
 
   await fetch(GAS_URL, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
       action: "publish",
-      id: id,
-      password: password,
+      id,
+      idToken: token,
     }),
   });
 
   alert("公開しました");
-  setTimeout(() => {
-    loadAdminPosts();
-  }, 2000);
+  setTimeout(loadAdminPosts, 2000);
 }
 
 function togglePost(id) {
@@ -169,7 +155,6 @@ function togglePost(id) {
   el.style.display = el.style.display === "block" ? "none" : "block";
 }
 
-import { signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 function logout() {
   signOut(auth)
@@ -180,16 +165,6 @@ function logout() {
       console.error("ログアウト失敗", error);
     });
 }
-
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("admin-content").style.display = "block";
-  } else {
-    document.getElementById("login-screen").style.display = "block";
-    document.getElementById("admin-content").style.display = "none";
-  }
-});
 
 window.login = login;
 window.logout = logout;
