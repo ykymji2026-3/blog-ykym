@@ -38,45 +38,10 @@
                 </section>
 
                 <section>
-                    <h2 data-ja="投稿一覧" data-en="Posts">投稿一覧</h2>
-                    <section class="search-panel">
-                        <div class="search-controls">
-                            <input id="admin-keyword-filter" class="form-control search-input" type="text"
-                                data-ja-placeholder="キーワード検索..." data-en-placeholder="Search keywords..."
-                                placeholder="キーワード検索...">
-                            <button id="admin-filter-toggle" class="btn" type="button" aria-expanded="false"
-                                data-ja-show="詳細検索を表示" data-en-show="Show advanced search" data-ja-hide="詳細検索を非表示"
-                                data-en-hide="Hide advanced search">詳細検索を表示</button>
-                        </div>
-
-                        <div id="admin-filter-panel" class="search-controls" hidden>
-                            <label class="filter-field">
-                                <span data-ja="カテゴリ" data-en="Category">カテゴリ</span>
-                                <select id="admin-category-filter" class="form-control search-select">
-                                    <option value="all" data-ja="すべて" data-en="All">すべて</option>
-                                </select>
-                            </label>
-
-                            <label class="filter-field">
-                                <span data-ja="開始日" data-en="Start date">開始日</span>
-                                <input id="admin-start-date" class="form-control" type="date">
-                            </label>
-
-                            <label class="filter-field">
-                                <span data-ja="終了日" data-en="End date">終了日</span>
-                                <input id="admin-end-date" class="form-control" type="date">
-                            </label>
-
-                            <div class="form-actions filter-actions">
-                                <button id="admin-filter-clear" class="btn" type="button" data-ja="クリア"
-                                    data-en="Clear">クリア</button>
-                            </div>
-                        </div>
-                    </section>
+                    <h2 data-ja="投稿一覧" data-en="Post List">投稿一覧</h2>
+                    <div data-component="../components/search.html"></div>
                     <ul id="admin-post-list"></ul>
                 </section>
-
-
             </div>
         </main>
 
