@@ -1,0 +1,422 @@
+/* =========================
+   Theme (カラー設定)
+========================= */
+:root {
+  --main-color: #7b1e3a;
+  --main-color-dark: #5f1730;
+  --main-color-soft: #9f3156;
+  --bg-color: #f5f7fb;
+  --card-color: #fff;
+  --text-color: #222;
+  --muted-color: #666;
+  --surface-color: #f7f3f5;
+  --border-color: #eee;
+  --radius-lg: 16px;
+  --shadow-soft: 0 14px 32px rgba(31, 41, 55, 0.1);
+  --shadow-hover: 0 18px 40px rgba(31, 41, 55, 0.16);
+}
+
+/* =========================
+   Base（全体）
+========================= */
+body {
+  margin: 0;
+  font-family: Arial, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* =========================
+   Header
+========================= */
+header {
+  background: linear-gradient(135deg, var(--main-color-dark), var(--main-color) 58%, var(--main-color-soft));
+  color: white;
+  text-align: center;
+  padding: 46px 20px 52px;
+  position: relative;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+header p {
+  margin: 8px 0 0;
+  font-size: 16px;
+  opacity: 0.88;
+}
+
+/* ヘッダーボタン */
+.header-logout-btn,
+.header-lang-btn,
+.header-btn-left,
+.admin-btn {
+  display: inline-block;
+  min-width: 160px;
+  min-height: 40px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  background: white;
+  color: #1f2937;
+  font-size: 14px;
+  line-height: 19px;
+  text-decoration: none;
+  text-align: center;
+  box-sizing: border-box;
+  z-index: 10;
+  box-shadow: 0 8px 18px rgba(31, 41, 55, 0.12);
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+
+.header-actions-left,
+.header-actions-right {
+  position: absolute;
+  top: 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.header-actions-left {
+  left: 20px;
+}
+
+.header-actions-right {
+  right: 20px;
+}
+
+.header-logout-btn:hover,
+.header-lang-btn:hover,
+.header-btn-left:hover,
+.admin-btn:hover {
+  opacity: 0.95;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(31, 41, 55, 0.16);
+}
+
+/* =========================
+   Layout（main・section）
+========================= */
+main {
+  max-width: 900px;
+  margin: -32px auto 40px;
+  padding: 30px;
+  border-radius: var(--radius-lg);
+}
+
+section {
+  margin-bottom: 40px;
+  min-height: 120px;
+}
+
+h2 {
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+
+/* =========================
+   List（投稿一覧）
+========================= */
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  margin-bottom: 6px;
+}
+
+/* =========================
+   Card（記事カード）
+========================= */
+.card {
+  background: var(--card-color);
+  padding: 18px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 14px;
+  border: 1px solid rgba(123, 30, 58, 0.06);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.card a {
+  display: block;
+  font-size: 17px;
+  font-weight: bold;
+  color: var(--main-color);
+}
+
+.card:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* メタ情報（日時・カテゴリ） */
+.meta {
+  font-size: 12px;
+  color: var(--muted-color);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 10px;
+}
+
+/* =========================
+   Container（白い箱）
+========================= */
+.container {
+  background: white;
+  padding: 30px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 18px 48px rgba(31, 41, 55, 0.12);
+  border: 1px solid rgba(123, 30, 58, 0.06);
+
+  max-width: 800px;
+  margin: 0 auto;
+  width: 95%;
+}
+
+/* =========================
+   Post Detail（記事詳細）
+========================= */
+.post-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.post-content {
+  margin-top: 20px;
+  line-height: 1.8;
+  font-size: 16px;
+}
+
+/* 戻るボタン */
+.back-btn {
+  display: inline-block;
+  margin-top: 30px;
+  padding: 10px 18px;
+  background: var(--main-color);
+  color: white;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+
+/* 0件のときメッセージ表示 */
+.no-result {
+  text-align: center;
+  color: #777;
+  padding: 30px;
+  font-size: 14px;
+}
+
+.highlight {
+  background: yellow;
+  font-weight: bold;
+}
+
+button {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  background: var(--main-color);
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s, box-shadow 0.2s;
+}
+
+.btn {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  background: var(--main-color);
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s, box-shadow 0.2s;
+}
+
+button:hover,
+.btn:hover,
+.back-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(31, 41, 55, 0.12);
+}
+
+button.danger,
+.btn.danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.card div {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  margin-bottom: 12px;
+  transition: background 0.2s;
+  box-shadow: 0 8px 18px rgba(31, 41, 55, 0.08);
+}
+
+.card-content {
+  flex: 1;
+  cursor: pointer;
+}
+
+.card-row:hover {
+  background: var(--surface-color);
+}
+
+.preview {
+  font-size: 12px;
+  color: #777;
+  margin-top: 5px;
+}
+
+.card-actions {
+  margin-left: 10px;
+}
+
+.detail {
+  display: none;
+}
+
+.result-count {
+  margin: 10px 0;
+  color: #666;
+}
+/* =========================
+   Footer
+========================= */
+footer {
+  text-align: center;
+  padding: 18px 20px 24px;
+  color: var(--muted-color);
+  font-size: 12px;
+}
+
+/* 入力欄 */
+.form-control {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: var(--surface-color);
+  font-size: 14px;
+  transition: 0.2s;
+  box-sizing: border-box;
+}
+
+.form-control:hover {
+  background: #efe7eb;
+}
+
+.form-control:focus {
+  border-color: #7b1e3a;
+  background: white;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(123,30,58,0.14);
+}
+
+.search-panel {
+  margin-bottom: 26px;
+  min-height: 0;
+}
+
+.search-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: linear-gradient(135deg, white, var(--surface-color));
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  border: 1px solid rgba(123, 30, 58, 0.08);
+  box-shadow: 0 16px 34px rgba(123, 30, 58, 0.14);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.search-panel .search-controls + .search-controls {
+  margin-top: 12px;
+}
+
+.search-controls:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 20px 44px rgba(123, 30, 58, 0.18);
+}
+
+.search-input {
+  flex: 1;
+}
+
+.search-select {
+  max-width: 180px;
+  appearance: none;
+}
+
+.filter-field {
+  flex: 1;
+  min-width: 160px;
+  color: var(--muted-color);
+  font-size: 12px;
+}
+
+.filter-field span {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.filter-actions {
+  margin-top: 20px;
+}
+
+/* ボタン配置 */
+.form-actions {
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* トースト（超重要） */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #7b1e3a;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: 0.3s;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}

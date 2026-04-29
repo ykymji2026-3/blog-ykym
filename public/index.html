@@ -4,25 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <title>IT女子の学習と日常</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 
 <body>
 
-    <header>
-        <button id="langBtn" onclick="toggleLang()">Switch to English</button>
-        <h1 data-ja="IT女子の学習と日常" data-en="An IT girl's study and daily life">
-            IT女子の学習と日常
-        </h1>
-
-        <p data-ja="ITやAWSの学習を初心者目線で分かりやすくまとめています" data-en="Sharing IT & AWS learning from a beginner’s perspective">
-            ITやAWSの学習を初心者目線で分かりやすくまとめています
-        </p>
-
-        <a id="admin-link" class="admin-btn" href="login/" data-ja="管理画面" data-en="Admin">
-            管理画面
-        </a>
-    </header>
+    <div data-component="../components/header.html"></div>
+    <button id="langBtn" class="header-lang-btn" onclick="toggleLang()" data-header-action="right">Switch to English</button>
+    <a id="admin-link" class="admin-btn" href="../auth/login.html" data-header-action="left" data-ja="管理画面" data-en="Admin">
+        管理画面
+    </a>
 
     <main>
         <div class="container">
@@ -37,26 +28,20 @@
                 </p>
             </section>
 
-            <input id="searchInput" type="text" placeholder="検索...">
-
-            <select id="categoryFilter">
-                <option value="all">すべて</option>
-            </select>
-
-            <p id="result-count" style="margin:10px 0; color:#666;"></p>
-
             <section>
                 <h2 data-ja="投稿一覧" data-en="Post List">投稿一覧</h2>
+                <div data-component="../components/search.html"></div>
                 <ul id="post-list"></ul>
             </section>
         </div>
     </main>
 
-    <footer>
-        <p data-ja="@ 2026 Blog-ykym" data-en="@ 2026 Blog-ykym">@ 2026 Blog-ykym</p>
-    </footer>
+    <div data-component="../components/footer.html"></div>
 
-    <script src="script.js"></script>
+    <div id="toast" class="toast"></div>
+    <script src="../assets/js/ui.js"></script>
+    <script src="../assets/js/components.js"></script>
+    <script src="../assets/js/script.js"></script>
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
       import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -72,7 +57,7 @@
 
       onAuthStateChanged(auth, (user) => {
         if (user) {
-          document.getElementById("admin-link").href = "admin.html";
+          document.getElementById("admin-link").href = "../admin/";
           document.getElementById("admin-link").style.display = "inline-block";
         }
       });

@@ -41,34 +41,3 @@ function processScheduledPosts() {
     }
   }
 }
-
-function doGet(e) {
-  if (e.parameter.action === "listScheduled") {
-    return getScheduledPosts();
-  }
-}
-
-function getScheduledPosts() {
-  const sheet = SpreadsheetApp
-    .getActiveSpreadsheet()
-    .getSheetByName("予約投稿");
-
-  const data = sheet.getDataRange().getValues();
-
-  if (data.length <= 1) {
-    return ContentService
-      .createTextOutput(JSON.stringify([]))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-
-  const result = data.slice(1).map(row => ({
-    publishAt: row[0],
-    title: row[1],
-    category: row[3],
-    status: row[4]
-  }));
-
-  return ContentService
-    .createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON);
-}

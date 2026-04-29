@@ -62,7 +62,7 @@ async function getPosts() {
   // 一度取得したら再利用
   if (cachedPosts) return cachedPosts;
 
-  const res = await fetch("posts.json");
+  const res = await fetch("../posts.json");
   cachedPosts = await res.json();
   return cachedPosts;
 }
@@ -175,14 +175,6 @@ function filterPosts() {
   const category = document.getElementById("categoryFilter").value;
   const resultCount = document.getElementById("result-count");
 
-  // 空検索 → 全件表示＋件数消す
-  if (!keyword) {
-    const visible = allPosts.filter((p) => !p.draft);
-    renderList(visible);
-    resultCount.textContent = "";
-    return;
-  }
-
   let filtered = allPosts
     .filter((p) => !p.draft)
     .filter((post) => {
@@ -193,6 +185,7 @@ function filterPosts() {
       const contentEn = post.contentEn || "";
 
       const matchKeyword =
+        !keyword ||
         titleJa.toLowerCase().includes(keyword) ||
         titleEn.toLowerCase().includes(keyword) ||
         content.toLowerCase().includes(keyword) ||
@@ -205,15 +198,17 @@ function filterPosts() {
 
   // 件数表示
   resultCount.textContent =
-    currentLang === "ja"
-      ? `${filtered.length}件ヒットしました`
-      : `${filtered.length} results found`;
+    !keyword && category === "all"
+      ? ""
+      : currentLang === "ja"
+        ? `${filtered.length}件ヒットしました`
+        : `${filtered.length} results found`;
 
   // 0件の場合はメッセージ表示
   if (filtered.length === 0) {
     const list = document.getElementById("post-list");
     list.innerHTML = `
-        <p style="text-align:center; color:#777; padding:20px;">
+        <p class="no-result">
           ${currentLang === "ja" ? "該当する記事がありません" : "No posts found"}
         </p>
       `;
@@ -236,11 +231,13 @@ function highlight(text, keyword) {
 // ====================
 // イベント登録
 // ====================
-document.getElementById("searchInput")?.addEventListener("input", filterPosts);
+function setupSearchEvents() {
+  document.getElementById("searchInput")?.addEventListener("input", filterPosts);
 
-document
-  .getElementById("categoryFilter")
-  ?.addEventListener("change", filterPosts);
+  document
+    .getElementById("categoryFilter")
+    ?.addEventListener("change", filterPosts);
+}
 
 // -------------------
 // 記事詳細表示
@@ -263,7 +260,10 @@ async function showPostIfNeeded() {
 // ====================
 // 初期処理
 // ====================
-window.onload = () => {
+function initPage() {
+  setupSearchEvents();
   applyLang();
   renderCurrentPage();
-};
+}
+
+document.addEventListener("components:ready", initPage);

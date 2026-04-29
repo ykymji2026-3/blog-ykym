@@ -5,9 +5,7 @@ function doPost(e) {
   const idToken = body.idToken;
 
   if (!verifyIdToken(idToken)) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ error: "unauthorized" }),
-    ).setMimeType(ContentService.MimeType.JSON);
+    return jsonOutput({ error: "unauthorized" });
   }
 
   if (body.action === "delete") {
@@ -17,9 +15,21 @@ function doPost(e) {
     return publishPostById(body.id);
   }
 
-  return ContentService.createTextOutput(
-    JSON.stringify({ error: "unknown action" }),
-  ).setMimeType(ContentService.MimeType.JSON);
+  return jsonOutput({ error: "unknown action" });
+}
+
+function jsonOutput(data, callback) {
+  const json = JSON.stringify(data);
+
+  if (callback && /^[A-Za-z_$][0-9A-Za-z_$]*$/.test(callback)) {
+    return ContentService.createTextOutput(`${callback}(${json});`).setMimeType(
+      ContentService.MimeType.JAVASCRIPT,
+    );
+  }
+
+  return ContentService.createTextOutput(json).setMimeType(
+    ContentService.MimeType.JSON,
+  );
 }
 
 function verifyIdToken(idToken) {
@@ -46,21 +56,18 @@ function verifyIdToken(idToken) {
 
 function doGet(e) {
   const idToken = e.parameter.idToken;
+  const callback = e.parameter.callback;
 
   if (!verifyIdToken(idToken)) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ error: "unauthorized" }),
-    ).setMimeType(ContentService.MimeType.JSON);
+    return jsonOutput({ error: "unauthorized" }, callback);
   }
 
   const action = e.parameter.action;
   if (action === "listScheduled") {
-    return getScheduledPosts();
+    return getScheduledPosts(callback);
   }
 
-  return ContentService.createTextOutput(
-    JSON.stringify({ error: "unknown action" }),
-  ).setMimeType(ContentService.MimeType.JSON);
+  return jsonOutput({ error: "unknown action" }, callback);
 }
 
 function deletePostById(postId) {
@@ -78,9 +85,7 @@ function deletePostById(postId) {
   });
 
   if (fileRes.getResponseCode() !== 200) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ error: "failed to fetch file" }),
-    ).setMimeType(ContentService.MimeType.JSON);
+    return jsonOutput({ error: "failed to fetch file" });
   }
 
   const fileData = JSON.parse(fileRes.getContentText());
@@ -94,9 +99,7 @@ function deletePostById(postId) {
   const filtered = posts.filter((p) => p.id !== postId);
 
   if (filtered.length === posts.length) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ success: false, error: "post not found" }),
-    ).setMimeType(ContentService.MimeType.JSON);
+    return jsonOutput({ success: false, error: "post not found" });
   }
 
   // 3. GitHub に更新
@@ -113,21 +116,17 @@ function deletePostById(postId) {
   });
 
   if (![200, 201].includes(updateRes.getResponseCode())) {
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: false,
-        error: `github update failed: ${updateRes.getResponseCode()}`,
-        detail: updateRes.getContentText(),
-      }),
-    ).setMimeType(ContentService.MimeType.JSON);
+    return jsonOutput({
+      success: false,
+      error: `github update failed: ${updateRes.getResponseCode()}`,
+      detail: updateRes.getContentText(),
+    });
   }
 
-  return ContentService.createTextOutput(
-    JSON.stringify({ success: true, deletedId: postId }),
-  ).setMimeType(ContentService.MimeType.JSON);
+  return jsonOutput({ success: true, deletedId: postId });
 }
 
-function getScheduledPosts() {
+function getScheduledPosts(callback) {
   const sheet =
     SpreadsheetApp.getActiveSpreadsheet().getSheetByName("予約投稿");
 
@@ -136,11 +135,11 @@ function getScheduledPosts() {
   const posts = data.slice(1).map((row) => ({
     publishAt: row[0],
     title: row[1],
+    category: row[3],
+    status: row[4],
   }));
 
-  return ContentService.createTextOutput(JSON.stringify(posts)).setMimeType(
-    ContentService.MimeType.JSON,
-  );
+  return jsonOutput(posts, callback);
 }
 
 function publishPostById(postId) {
@@ -157,9 +156,7 @@ function publishPostById(postId) {
   });
 
   if (fileRes.getResponseCode() !== 200) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ error: "failed to fetch file" }),
-    ).setMimeType(ContentService.MimeType.JSON);
+    return jsonOutput({ error: "failed to fetch file" });
   }
 
   const fileData = JSON.parse(fileRes.getContentText());
@@ -181,9 +178,7 @@ function publishPostById(postId) {
   });
 
   if (!found) {
-    return ContentService.createTextOutput(
-      JSON.stringify({ success: false, error: "post not found" }),
-    ).setMimeType(ContentService.MimeType.JSON);
+    return jsonOutput({ success: false, error: "post not found" });
   }
 
   // 3. GitHub に更新
@@ -200,16 +195,12 @@ function publishPostById(postId) {
   });
 
   if (![200, 201].includes(updateRes.getResponseCode())) {
-    return ContentService.createTextOutput(
-      JSON.stringify({
-        success: false,
-        error: `github update failed: ${updateRes.getResponseCode()}`,
-        detail: updateRes.getContentText(),
-      }),
-    ).setMimeType(ContentService.MimeType.JSON);
+    return jsonOutput({
+      success: false,
+      error: `github update failed: ${updateRes.getResponseCode()}`,
+      detail: updateRes.getContentText(),
+    });
   }
 
-  return ContentService.createTextOutput(
-    JSON.stringify({ success: true, publishedId: postId }),
-  ).setMimeType(ContentService.MimeType.JSON);
+  return jsonOutput({ success: true, publishedId: postId });
 }

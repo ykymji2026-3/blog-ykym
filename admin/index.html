@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="../assets/js/ui.js"></script>
+    <script src="../assets/js/components.js"></script>
+    <script type="module" src="../assets/js/admin.js?v=common-ui-1"></script>
+</head>
+
+<body>
+
+    <!-- 管理画面 -->
+    <div id="admin-content" hidden>
+
+        <div data-component="../components/header.html"></div>
+        <a class="header-btn-left" href="../public/" data-header-action="left" data-ja="ブログに戻る"
+            data-en="Back to Blog">ブログに戻る</a>
+        <button class="header-logout-btn" onclick="logout()" data-header-action="right" data-ja="ログアウト"
+            data-en="Log out">ログアウト</button>
+
+        <main>
+            <div class="container">
+                <section>
+                    <h2 data-ja="管理画面" data-en="Admin">管理画面</h2>
+                </section>
+
+                <section>
+                    <h2 data-ja="下書き一覧" data-en="Drafts">下書き一覧</h2>
+                    <ul id="draft-list"></ul>
+                </section>
+
+                <section>
+                    <h2 data-ja="予約投稿" data-en="Scheduled Posts">予約投稿</h2>
+                    <ul id="scheduled-list"></ul>
+                </section>
+
+                <section>
+                    <h2 data-ja="投稿一覧" data-en="Posts">投稿一覧</h2>
+                    <section class="search-panel">
+                        <div class="search-controls">
+                            <input id="admin-keyword-filter" class="form-control search-input" type="text"
+                                data-ja-placeholder="キーワード検索..." data-en-placeholder="Search keywords..."
+                                placeholder="キーワード検索...">
+                            <button id="admin-filter-toggle" class="btn" type="button" aria-expanded="false"
+                                data-ja-show="詳細検索を表示" data-en-show="Show advanced search" data-ja-hide="詳細検索を非表示"
+                                data-en-hide="Hide advanced search">詳細検索を表示</button>
+                        </div>
+
+                        <div id="admin-filter-panel" class="search-controls" hidden>
+                            <label class="filter-field">
+                                <span data-ja="カテゴリ" data-en="Category">カテゴリ</span>
+                                <select id="admin-category-filter" class="form-control search-select">
+                                    <option value="all" data-ja="すべて" data-en="All">すべて</option>
+                                </select>
+                            </label>
+
+                            <label class="filter-field">
+                                <span data-ja="開始日" data-en="Start date">開始日</span>
+                                <input id="admin-start-date" class="form-control" type="date">
+                            </label>
+
+                            <label class="filter-field">
+                                <span data-ja="終了日" data-en="End date">終了日</span>
+                                <input id="admin-end-date" class="form-control" type="date">
+                            </label>
+
+                            <div class="form-actions filter-actions">
+                                <button id="admin-filter-clear" class="btn" type="button" data-ja="クリア"
+                                    data-en="Clear">クリア</button>
+                            </div>
+                        </div>
+                    </section>
+                    <ul id="admin-post-list"></ul>
+                </section>
+
+
+            </div>
+        </main>
+
+    </div>
+
+    <div data-component="../components/footer.html"></div>
+    <div id="toast" class="toast"></div>
+
+</body>
+
+</html>
