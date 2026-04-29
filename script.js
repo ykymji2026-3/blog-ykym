@@ -42,11 +42,15 @@ function applyLang() {
   });
   // ボタンテキスト変更
   const btn = document.getElementById("langBtn");
-  btn.textContent =
-    currentLang === "ja" ? "Switch to English" : "日本語に切り替える";
+  if (btn) {
+    btn.textContent =
+      currentLang === "ja" ? "Switch to English" : "日本語に切り替える";
+  }
   // 検索バーのプレースホルダ変更
-  document.getElementById("searchInput").placeholder =
-    currentLang === "ja" ? "検索..." : "Search...";
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.placeholder = currentLang === "ja" ? "検索..." : "Search...";
+  }
 }
 
 // ====================
@@ -144,6 +148,7 @@ function renderPost(post) {
 // ====================
 function setupCategory(posts) {
   const select = document.getElementById("categoryFilter");
+  if (!select) return;
 
   // 重複なしカテゴリ
   const categories = [...new Set(posts.map((p) => p.category))];
@@ -231,11 +236,11 @@ function highlight(text, keyword) {
 // ====================
 // イベント登録
 // ====================
-document.getElementById("searchInput").addEventListener("input", filterPosts);
+document.getElementById("searchInput")?.addEventListener("input", filterPosts);
 
 document
   .getElementById("categoryFilter")
-  .addEventListener("change", filterPosts);
+  ?.addEventListener("change", filterPosts);
 
 // -------------------
 // 記事詳細表示

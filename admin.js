@@ -173,3 +173,8 @@ window.logout = logout;
 window.publishPost = publishPost;
 window.deletePost = deletePost;
 window.togglePost = togglePost;
+
+auth.currentUser.getIdTokenResult().then(result => {
+  console.log("UID:", auth.currentUser.uid);
+  console.log("Claims:", result.claims);
+});
