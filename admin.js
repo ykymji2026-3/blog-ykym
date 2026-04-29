@@ -124,6 +124,7 @@ function initAdminPage() {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       document.getElementById("admin-content").style.display = "block";
+      console.log("===== UID =====", user.uid);  // 一時的なログ
       loadAdminPosts();
       loadScheduledPosts();
     } else {
