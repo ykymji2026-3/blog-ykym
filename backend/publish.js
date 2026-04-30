@@ -137,6 +137,8 @@ function getScheduledPosts(callback) {
     title: row[1],
     category: row[3],
     status: row[4],
+    memberOnly: row[5],
+    imageUrl: row[6],
   }));
 
   return jsonOutput(posts, callback);

@@ -26,7 +26,9 @@ function processScheduledPosts() {
           row[2], // content
           row[3], // category
           row[0], // publishAt
-          row[4]  // status
+          row[4], // status
+          row[5], // memberOnly
+          row[6]  // imageUrl
         ]
       };
 

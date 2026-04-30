@@ -166,6 +166,7 @@ function renderAdminPosts(posts) {
     const content = window.getCurrentLang() === "en"
       ? post.contentEn || post.content
       : post.content;
+    const image = renderAdminEyecatchImage(getPostImageUrl(post));
 
     // 下書き
     if (post.draft) {
@@ -190,6 +191,7 @@ function renderAdminPosts(posts) {
         <!-- クリックエリア -->
         <div class="card-content" onclick="togglePost('${post.id}')">
           <strong>${title}</strong>
+          <div class="meta">${getPostDisplayDate(post)} / ${post.category}</div>
         </div>
 
         <!-- 削除ボタン -->
@@ -202,11 +204,86 @@ function renderAdminPosts(posts) {
 
       <!-- 展開部分 -->
       <div id="content-${post.id}" class="detail">
+        ${image}
         ${content}
       </div>
     `;
     postList.appendChild(li);
   });
+}
+
+function getSafeImageUrl(url) {
+  if (!url) return "";
+
+  const trimmed = String(url).trim();
+  if (!trimmed) return "";
+
+  try {
+    const parsed = new URL(trimmed, location.href);
+    if (!["http:", "https:"].includes(parsed.protocol)) return "";
+    const driveId = getGoogleDriveFileId(parsed);
+    if (driveId) {
+      return `https://drive.google.com/thumbnail?id=${encodeURIComponent(driveId)}&sz=w1200`;
+    }
+    return parsed.href;
+  } catch (error) {
+    return "";
+  }
+}
+
+function getGoogleDriveFileId(url) {
+  if (url.hostname !== "drive.google.com") return "";
+
+  const filePathMatch = url.pathname.match(/\/file\/d\/([^/]+)/);
+  if (filePathMatch) return filePathMatch[1];
+
+  return url.searchParams.get("id") || "";
+}
+
+function getPostImageUrl(post) {
+  return (
+    post.imageUrl ||
+    post.eyecatchImageUrl ||
+    post.thumbnailUrl ||
+    post.imageURL ||
+    post.image ||
+    post["アイキャッチ画像URL"] ||
+    post["画像URL"] ||
+    ""
+  );
+}
+
+function getPostDisplayDate(post) {
+  if (!isInvalidDisplayDate(post.date)) return post.date;
+
+  const dateFromId = new Date(Number(post.id));
+  if (Number.isNaN(dateFromId.getTime())) return post.date;
+
+  return formatPostDate(dateFromId);
+}
+
+function isInvalidDisplayDate(dateText) {
+  if (!dateText) return true;
+
+  const parsed = parsePostDate(dateText);
+  return !parsed || parsed.getFullYear() < 2000;
+}
+
+function formatPostDate(date) {
+  const pad = (value) => String(value).padStart(2, "0");
+
+  return [
+    date.getFullYear(),
+    pad(date.getMonth() + 1),
+    pad(date.getDate())
+  ].join("/") + ` ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function renderAdminEyecatchImage(url) {
+  const safeUrl = getSafeImageUrl(url);
+  if (!safeUrl) return "";
+
+  return `<img class="admin-eyecatch" src="${safeUrl}" alt="" loading="lazy">`;
 }
 
 async function deletePost(id) {

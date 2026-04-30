@@ -46,24 +46,45 @@ function applyLang() {
     btn.textContent =
       currentLang === "ja" ? "Switch to English" : "日本語に切り替える";
   }
-  // 検索バーのプレースホルダ変更
-  const searchInput = document.getElementById("searchInput");
-  if (searchInput) {
-    searchInput.placeholder = currentLang === "ja" ? "検索..." : "Search...";
-  }
+  document.querySelectorAll("[data-ja-placeholder]").forEach((el) => {
+    el.placeholder = el.getAttribute("data-" + currentLang + "-placeholder");
+  });
+
+  updateFilterToggleLabel();
 }
 
 // ====================
 // 投稿データ取得（キャッシュあり）
 // ====================
 let cachedPosts = null;
+let searchEventsReady = false;
+const GITHUB_POSTS_API_URL =
+  "https://api.github.com/repos/ykymji2026-3/blog-ykym/contents/posts.json?ref=main";
+const isLocalOrigin = ["localhost", "127.0.0.1"].includes(location.hostname);
 
 async function getPosts() {
   // 一度取得したら再利用
   if (cachedPosts) return cachedPosts;
 
-  const res = await fetch("../posts.json");
-  cachedPosts = await res.json();
+  if (!isLocalOrigin) {
+    const res = await fetch(`../posts.json?${Date.now()}`);
+    cachedPosts = await res.json();
+    return cachedPosts;
+  }
+
+  const res = await fetch(`${GITHUB_POSTS_API_URL}&cacheBust=${Date.now()}`, {
+    headers: {
+      Accept: "application/vnd.github+json",
+    },
+  });
+  if (!res.ok) {
+    throw new Error("GitHubの投稿一覧を取得できませんでした。");
+  }
+
+  const file = await res.json();
+  const binary = atob(file.content.replace(/\s/g, ""));
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  cachedPosts = JSON.parse(new TextDecoder("utf-8").decode(bytes));
   return cachedPosts;
 }
 // 全投稿データ
@@ -78,14 +99,14 @@ async function loadPosts() {
   // 管理者なら全部、一般は下書き除外
   const visiblePosts = allPosts.filter((p) => !p.draft);
   list.innerHTML = "";
-  renderList(visiblePosts); // 一覧表示
   setupCategory(visiblePosts); // カテゴリ生成
+  filterPosts(); // 一覧表示
 }
 
 // ====================
 // 投稿一覧描画
 // ====================
-function renderList(posts) {
+function renderList(posts, keyword = "") {
   const list = document.getElementById("post-list");
   list.innerHTML = ""; // 一度リセット
 
@@ -94,13 +115,15 @@ function renderList(posts) {
     li.className = "card";
 
     const rawTitle = post.title?.[currentLang] || post.title;
-    const title = highlight(rawTitle, keyword = "");
+    const title = highlight(rawTitle, keyword);
+    const image = renderEyecatchImage(getPostImageUrl(post), "post-card-image");
 
     li.innerHTML = `
+      ${image}
       <a href="?id=${post.id}">
         ${post.memberOnly ? "🔒 " : ""}${title}
       </a>
-      <div class="meta">${post.date} / ${post.category}</div>
+      <div class="meta">${getPostDisplayDate(post)} / ${post.category}</div>
     `;
 
     list.appendChild(li);
@@ -111,6 +134,8 @@ function renderList(posts) {
 // 記事詳細描画
 // ====================
 function renderPost(post) {
+  const image = renderEyecatchImage(getPostImageUrl(post), "post-eyecatch");
+
   return `
     <section>
         <div class="container">
@@ -121,8 +146,9 @@ function renderPost(post) {
 
             <!-- メタ情報 -->
             <div class="meta">
-                ${post.date} / ${post.category}
+                ${getPostDisplayDate(post)} / ${post.category}
             </div>
+            ${image}
             <!-- 本文 -->
             <div class="post-content">
               ${
@@ -143,15 +169,90 @@ function renderPost(post) {
     `;
 }
 
+function getSafeImageUrl(url) {
+  if (!url) return "";
+
+  const trimmed = String(url).trim();
+  if (!trimmed) return "";
+
+  try {
+    const parsed = new URL(trimmed, location.href);
+    if (!["http:", "https:"].includes(parsed.protocol)) return "";
+    const driveId = getGoogleDriveFileId(parsed);
+    if (driveId) {
+      return `https://drive.google.com/thumbnail?id=${encodeURIComponent(driveId)}&sz=w1200`;
+    }
+    return parsed.href;
+  } catch (error) {
+    return "";
+  }
+}
+
+function getGoogleDriveFileId(url) {
+  if (url.hostname !== "drive.google.com") return "";
+
+  const filePathMatch = url.pathname.match(/\/file\/d\/([^/]+)/);
+  if (filePathMatch) return filePathMatch[1];
+
+  return url.searchParams.get("id") || "";
+}
+
+function getPostImageUrl(post) {
+  return (
+    post.imageUrl ||
+    post.eyecatchImageUrl ||
+    post.thumbnailUrl ||
+    post.imageURL ||
+    post.image ||
+    post["アイキャッチ画像URL"] ||
+    post["画像URL"] ||
+    ""
+  );
+}
+
+function getPostDisplayDate(post) {
+  if (!isInvalidDisplayDate(post.date)) return post.date;
+
+  const dateFromId = new Date(Number(post.id));
+  if (Number.isNaN(dateFromId.getTime())) return post.date;
+
+  return formatPostDate(dateFromId);
+}
+
+function isInvalidDisplayDate(dateText) {
+  if (!dateText) return true;
+
+  const parsed = parsePostDate(dateText);
+  return !parsed || parsed.getFullYear() < 2000;
+}
+
+function formatPostDate(date) {
+  const pad = (value) => String(value).padStart(2, "0");
+
+  return [
+    date.getFullYear(),
+    pad(date.getMonth() + 1),
+    pad(date.getDate())
+  ].join("/") + ` ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function renderEyecatchImage(url, className) {
+  const safeUrl = getSafeImageUrl(url);
+  if (!safeUrl) return "";
+
+  return `<img class="${className}" src="${safeUrl}" alt="" loading="lazy">`;
+}
+
 // ====================
 // カテゴリ生成
 // ====================
 function setupCategory(posts) {
-  const select = document.getElementById("categoryFilter");
+  const select = document.getElementById("admin-category-filter");
   if (!select) return;
 
+  const selected = select.value;
   // 重複なしカテゴリ
-  const categories = [...new Set(posts.map((p) => p.category))];
+  const categories = [...new Set(posts.map((p) => p.category).filter(Boolean))];
 
   // 初期（すべて）
   select.innerHTML = `
@@ -165,14 +266,57 @@ function setupCategory(posts) {
     option.textContent = cat;
     select.appendChild(option);
   });
+
+  if ([...select.options].some((option) => option.value === selected)) {
+    select.value = selected;
+  }
+}
+
+function parsePostDate(dateText) {
+  if (!dateText) return null;
+  const [datePart, timePart = "00:00"] = dateText.split(" ");
+  const [year, month, day] = datePart.split("/").map(Number);
+  const [hour, minute] = timePart.split(":").map(Number);
+  const date = new Date(year, month - 1, day, hour || 0, minute || 0);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function getDateInputValue(id, endOfDay = false) {
+  const value = document.getElementById(id)?.value;
+  if (!value) return null;
+
+  const date = new Date(value);
+  if (endOfDay) {
+    date.setHours(23, 59, 59, 999);
+  }
+  return date;
+}
+
+function updateFilterToggleLabel() {
+  const toggle = document.getElementById("admin-filter-toggle");
+  const panel = document.getElementById("admin-filter-panel");
+  if (!toggle || !panel) return;
+
+  const isOpen = !panel.hidden;
+  toggle.setAttribute("aria-expanded", String(isOpen));
+  toggle.textContent =
+    currentLang === "ja"
+      ? isOpen
+        ? "詳細検索を非表示"
+        : "詳細検索を表示"
+      : isOpen
+        ? "Hide advanced search"
+        : "Show advanced search";
 }
 
 // ====================
 // 検索＆フィルタ
 // ====================
 function filterPosts() {
-  const keyword = document.getElementById("searchInput").value.toLowerCase();
-  const category = document.getElementById("categoryFilter").value;
+  const keyword = document.getElementById("admin-keyword-filter")?.value.toLowerCase() || "";
+  const category = document.getElementById("admin-category-filter")?.value || "all";
+  const startDate = getDateInputValue("admin-start-date");
+  const endDate = getDateInputValue("admin-end-date", true);
   const resultCount = document.getElementById("result-count");
 
   let filtered = allPosts
@@ -192,17 +336,22 @@ function filterPosts() {
         contentEn.toLowerCase().includes(keyword);
 
       const matchCategory = category === "all" || post.category === category;
+      const postDate = parsePostDate(post.date);
+      const matchStart = !startDate || (postDate && postDate >= startDate);
+      const matchEnd = !endDate || (postDate && postDate <= endDate);
 
-      return matchKeyword && matchCategory;
+      return matchKeyword && matchCategory && matchStart && matchEnd;
     });
 
   // 件数表示
-  resultCount.textContent =
-    !keyword && category === "all"
-      ? ""
-      : currentLang === "ja"
-        ? `${filtered.length}件ヒットしました`
-        : `${filtered.length} results found`;
+  if (resultCount) {
+    resultCount.textContent =
+      !keyword && category === "all" && !startDate && !endDate
+        ? ""
+        : currentLang === "ja"
+          ? `${filtered.length}件ヒットしました`
+          : `${filtered.length} results found`;
+  }
 
   // 0件の場合はメッセージ表示
   if (filtered.length === 0) {
@@ -232,11 +381,43 @@ function highlight(text, keyword) {
 // イベント登録
 // ====================
 function setupSearchEvents() {
-  document.getElementById("searchInput")?.addEventListener("input", filterPosts);
+  if (searchEventsReady) return;
+  searchEventsReady = true;
+
+  const toggle = document.getElementById("admin-filter-toggle");
+  const panel = document.getElementById("admin-filter-panel");
+  const clear = document.getElementById("admin-filter-clear");
+
+  updateFilterToggleLabel();
+
+  toggle?.addEventListener("click", () => {
+    panel.hidden = !panel.hidden;
+    updateFilterToggleLabel();
+  });
 
   document
-    .getElementById("categoryFilter")
+    .getElementById("admin-keyword-filter")
+    ?.addEventListener("input", filterPosts);
+
+  document
+    .getElementById("admin-category-filter")
     ?.addEventListener("change", filterPosts);
+
+  document
+    .getElementById("admin-start-date")
+    ?.addEventListener("change", filterPosts);
+
+  document
+    .getElementById("admin-end-date")
+    ?.addEventListener("change", filterPosts);
+
+  clear?.addEventListener("click", () => {
+    document.getElementById("admin-keyword-filter").value = "";
+    document.getElementById("admin-category-filter").value = "all";
+    document.getElementById("admin-start-date").value = "";
+    document.getElementById("admin-end-date").value = "";
+    filterPosts();
+  });
 }
 
 // -------------------
