@@ -66,25 +66,7 @@ async function getPosts() {
   // 一度取得したら再利用
   if (cachedPosts) return cachedPosts;
 
-  if (!isLocalOrigin) {
-    const res = await fetch(`../posts.json?${Date.now()}`);
-    cachedPosts = await res.json();
-    return cachedPosts;
-  }
-
-  const res = await fetch(`${GITHUB_POSTS_API_URL}&cacheBust=${Date.now()}`, {
-    headers: {
-      Accept: "application/vnd.github+json",
-    },
-  });
-  if (!res.ok) {
-    throw new Error("GitHubの投稿一覧を取得できませんでした。");
-  }
-
-  const file = await res.json();
-  const binary = atob(file.content.replace(/\s/g, ""));
-  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
-  cachedPosts = JSON.parse(new TextDecoder("utf-8").decode(bytes));
+  cachedPosts = await window.BlogPosts.fetchPosts("../posts.json");
   return cachedPosts;
 }
 // 全投稿データ
@@ -94,8 +76,21 @@ let allPosts = [];
 // 投稿一覧読み込み
 // -------------------
 async function loadPosts() {
-  allPosts = await getPosts();
   const list = document.getElementById("post-list");
+  if (!list) return;
+
+  try {
+    allPosts = await getPosts();
+  } catch (error) {
+    console.error(error);
+    list.innerHTML = `
+      <p class="no-result">
+        ${currentLang === "ja" ? "投稿一覧を読み込めませんでした" : "Could not load posts"}
+      </p>
+    `;
+    return;
+  }
+
   // 管理者なら全部、一般は下書き除外
   const visiblePosts = allPosts.filter((p) => !p.draft);
   list.innerHTML = "";
@@ -108,6 +103,7 @@ async function loadPosts() {
 // ====================
 function renderList(posts, keyword = "") {
   const list = document.getElementById("post-list");
+  if (!list) return;
   list.innerHTML = ""; // 一度リセット
 
   posts.forEach((post) => {
@@ -116,7 +112,7 @@ function renderList(posts, keyword = "") {
 
     const rawTitle = post.title?.[currentLang] || post.title;
     const title = highlight(rawTitle, keyword);
-    const image = renderEyecatchImage(getPostImageUrl(post), "post-card-image");
+    const image = window.BlogPosts.renderPostImage(post, "post-card-image");
 
     li.innerHTML = `
       ${image}
@@ -134,39 +130,7 @@ function renderList(posts, keyword = "") {
 // 記事詳細描画
 // ====================
 function renderPost(post) {
-  const image = renderEyecatchImage(getPostImageUrl(post), "post-eyecatch");
-
-  return `
-    <section>
-        <div class="container">
-            <!-- タイトル -->
-            <h1 class="post-title">
-                ${(post.title && post.title[currentLang]) || post.title}
-            </h1>
-
-            <!-- メタ情報 -->
-            <div class="meta">
-                ${getPostDisplayDate(post)} / ${post.category}
-            </div>
-            ${image}
-            <!-- 本文 -->
-            <div class="post-content">
-              ${
-                currentLang === "en"
-                  ? post.contentEn || post.content
-                  : post.content
-              }
-            </div>
-
-            <a href="./"
-              class="back-btn"
-              data-ja="← 戻る"
-              data-en="← Back">
-              ← 戻る
-            </a>
-        </div>
-    </section>
-    `;
+  return window.BlogPosts.renderPostDetail(post, { backHref: "./" });
 }
 
 function getSafeImageUrl(url) {
@@ -356,6 +320,7 @@ function filterPosts() {
   // 0件の場合はメッセージ表示
   if (filtered.length === 0) {
     const list = document.getElementById("post-list");
+    if (!list) return;
     list.innerHTML = `
         <p class="no-result">
           ${currentLang === "ja" ? "該当する記事がありません" : "No posts found"}
@@ -382,11 +347,13 @@ function highlight(text, keyword) {
 // ====================
 function setupSearchEvents() {
   if (searchEventsReady) return;
-  searchEventsReady = true;
 
   const toggle = document.getElementById("admin-filter-toggle");
   const panel = document.getElementById("admin-filter-panel");
   const clear = document.getElementById("admin-filter-clear");
+  if (!toggle || !panel) return;
+
+  searchEventsReady = true;
 
   updateFilterToggleLabel();
 
@@ -448,3 +415,6 @@ function initPage() {
 }
 
 document.addEventListener("components:ready", initPage);
+document.addEventListener("DOMContentLoaded", () => {
+  setTimeout(initPage, 0);
+});

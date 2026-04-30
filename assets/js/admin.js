@@ -27,6 +27,15 @@ function t(ja, en) {
   return window.getCurrentLang() === "ja" ? ja : en;
 }
 
+function applyAdminHeader() {
+  const headerDescription = document.querySelector("header p");
+  if (!headerDescription) return;
+
+  headerDescription.setAttribute("data-ja", "管理画面");
+  headerDescription.setAttribute("data-en", "Admin");
+  headerDescription.textContent = t("管理画面", "Admin");
+}
+
 function getCurrentUser() {
   if (!auth.currentUser) {
     throw new Error("ログイン状態を確認できません。もう一度ログインしてください。");
@@ -54,24 +63,7 @@ async function sendGasAction(payload) {
 }
 
 async function getPostsForAdmin() {
-  if (!isLocalOrigin) {
-    const res = await fetch(`../posts.json?${Date.now()}`);
-    return res.json();
-  }
-
-  const res = await fetch(`${GITHUB_POSTS_API_URL}&cacheBust=${Date.now()}`, {
-    headers: {
-      Accept: "application/vnd.github+json",
-    },
-  });
-  if (!res.ok) {
-    throw new Error("GitHubの投稿一覧を取得できませんでした。");
-  }
-
-  const file = await res.json();
-  const binary = atob(file.content.replace(/\s/g, ""));
-  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
-  return JSON.parse(new TextDecoder("utf-8").decode(bytes));
+  return window.BlogPosts.fetchPosts("../posts.json");
 }
 
 async function loadAdminPosts() {
@@ -162,11 +154,8 @@ function renderAdminPosts(posts) {
   postList.innerHTML = "";
 
   posts.forEach((post) => {
-    const title = post.title?.[window.getCurrentLang()] || post.title?.ja || post.title;
-    const content = window.getCurrentLang() === "en"
-      ? post.contentEn || post.content
-      : post.content;
-    const image = renderAdminEyecatchImage(getPostImageUrl(post));
+    const title = window.BlogPosts.getPostTitle(post);
+    const detailUrl = `post.html?id=${encodeURIComponent(post.id)}`;
 
     // 下書き
     if (post.draft) {
@@ -187,25 +176,15 @@ function renderAdminPosts(posts) {
     li.dataset.postId = post.id;
     li.innerHTML = `
       <div class="card-row">
-
-        <!-- クリックエリア -->
-        <div class="card-content" onclick="togglePost('${post.id}')">
+        <div class="card-content">
           <strong>${title}</strong>
-          <div class="meta">${getPostDisplayDate(post)} / ${post.category}</div>
+          <div class="meta">${window.BlogPosts.getPostDisplayDate(post)} / ${post.category}</div>
         </div>
-
-        <!-- 削除ボタン -->
         <div class="card-actions">
-          <button class="btn danger" onclick="event.stopPropagation(); deletePost('${post.id}')">
-            ${t("削除", "Delete")}
-          </button>
+          <a class="btn" href="${detailUrl}">
+            ${t("詳細", "Details")}
+          </a>
         </div>
-      </div>
-
-      <!-- 展開部分 -->
-      <div id="content-${post.id}" class="detail">
-        ${image}
-        ${content}
       </div>
     `;
     postList.appendChild(li);
@@ -336,6 +315,7 @@ function initAdminPage() {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       document.getElementById("admin-content").hidden = false;
+      applyAdminHeader();
       setupAdminFilterEvents();
       loadAdminPosts();
       loadScheduledPosts();
@@ -432,6 +412,8 @@ window.deletePost = deletePost;
 window.togglePost = togglePost;
 
 document.addEventListener("language:changed", () => {
+  applyAdminHeader();
+
   const toggle = document.getElementById("admin-filter-toggle");
   const panel = document.getElementById("admin-filter-panel");
   if (toggle && panel) {

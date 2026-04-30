@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <title>Login</title>
-<link rel="stylesheet" href="../assets/css/style.css">
+<link rel="stylesheet" href="../assets/css/style.css?v=admin-theme-1">
 </head>
 
-<body>
+<body class="admin-page">
 <div data-component="../components/header.html"></div>
 
 <main>
@@ -157,6 +157,17 @@
       langBtn.textContent =
         currentLang === "ja" ? "Switch to English" : "日本語に切り替える";
     }
+
+    applyAdminHeader();
+  }
+
+  function applyAdminHeader() {
+    const headerDescription = document.querySelector("header p");
+    if (!headerDescription) return;
+
+    headerDescription.setAttribute("data-ja", "管理画面");
+    headerDescription.setAttribute("data-en", "Admin");
+    headerDescription.textContent = currentLang === "ja" ? "管理画面" : "Admin";
   }
 
   window.onload = () => {

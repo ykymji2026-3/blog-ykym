@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Post Detail</title>
+    <link rel="stylesheet" href="../assets/css/style.css?v=admin-detail-1">
+    <script src="../assets/js/ui.js"></script>
+    <script src="../assets/js/components.js"></script>
+    <script src="../assets/js/post-utils.js?v=latest-posts-1"></script>
+    <script type="module" src="../assets/js/admin-post.js?v=admin-detail-1"></script>
+</head>
+
+<body class="admin-page">
+    <div id="admin-post-content" hidden>
+        <div data-component="../components/header.html"></div>
+        <a class="header-btn-left" href="./" data-header-action="left" data-ja="管理画面に戻る"
+            data-en="Back to Admin">管理画面に戻る</a>
+        <button class="header-logout-btn" onclick="logout()" data-header-action="right" data-ja="ログアウト"
+            data-en="Log out">ログアウト</button>
+
+        <main id="admin-post-main"></main>
+    </div>
+
+    <div data-component="../components/footer.html"></div>
+    <div id="toast" class="toast"></div>
+</body>
+
+</html>

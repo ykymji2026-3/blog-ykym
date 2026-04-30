@@ -42,6 +42,17 @@ header {
   position: relative;
 }
 
+.admin-page {
+  --main-color: #0f5132;
+  --main-color-dark: #073b24;
+  --main-color-soft: #198754;
+  --surface-color: #eef7f1;
+}
+
+.admin-page header {
+  background: linear-gradient(135deg, var(--main-color-dark), var(--main-color) 58%, var(--main-color-soft));
+}
+
 header h1 {
   margin: 0;
   font-size: 30px;
@@ -326,6 +337,26 @@ button.danger,
 
 .detail {
   display: none;
+}
+
+.admin-post-detail {
+  background: white;
+  border: 1px solid rgba(123, 30, 58, 0.08);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 18px rgba(31, 41, 55, 0.08);
+  margin: -4px 0 14px;
+  padding: 16px;
+}
+
+.admin-post-body {
+  line-height: 1.8;
+  margin-top: 12px;
+}
+
+.admin-detail-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
 }
 
 .admin-eyecatch {
